@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: ai_knowledge_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: cmsuser
+      POSTGRES_PASSWORD: cmspassword
+      POSTGRES_DB: cmsdb
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
