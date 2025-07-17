@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,6 +12,10 @@ async function bootstrap() {
     origin: '*', // หรือจะระบุ origin เช่น 'http://localhost:3000'
     credentials: true,
   });
+
+  // เพิ่ม limit ของ body (default: 100kb)
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
   // ✅ เปิดใช้งาน class-validator ทั่วทั้งแอป
   app.useGlobalPipes(
