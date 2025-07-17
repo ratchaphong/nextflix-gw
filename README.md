@@ -36,8 +36,6 @@ npx prisma migrate dev
 yarn start:dev
 ```
 
----
-
 # 🎬 Movie App System (NestJS + Microservices)
 
 This is a full-stack microservices-based backend system for managing users and streaming movie data. Designed for scalability and modularity, this app serves as a base architecture for applications similar to Netflix.
