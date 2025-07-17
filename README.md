@@ -7,8 +7,6 @@
 - `movie-service` – ดึงข้อมูลภาพยนตร์จาก OMDB API
 - `gateway` – รับคำสั่งจาก frontend และส่งต่อไปยัง service ที่เกี่ยวข้องผ่าน HTTP/RPC
 
----
-
 ## ✅ ฟีเจอร์หลัก
 
 - ✅ สมัครสมาชิก / เข้าสู่ระบบ พร้อม JWT
@@ -21,8 +19,6 @@
 - ✅ ดึงภาพยนตร์ตามหมวดหมู่
 - ✅ ดึงรายการวิดีโอแนะนำ
 - ✅ Swagger พร้อม Bearer Token และจำ token ได้หลัง refresh
-
----
 
 ## ⚙️ การติดตั้ง
 
@@ -40,11 +36,11 @@ npx prisma migrate dev
 yarn start:dev
 ```
 
+---
+
 # 🎬 Movie App System (NestJS + Microservices)
 
 This is a full-stack microservices-based backend system for managing users and streaming movie data. Designed for scalability and modularity, this app serves as a base architecture for applications similar to Netflix.
-
----
 
 ## 🧱 Architecture
 
@@ -54,8 +50,6 @@ This project is composed of the following services:
 - **`profile-service`** – Each user can have up to 4 profiles
 - **`movie-service`** – Fetches movies from OMDB API
 - **`gateway`** – Entry point, routes requests to appropriate services
-
----
 
 ## ✅ Features
 
@@ -70,8 +64,6 @@ This project is composed of the following services:
 - ✅ Show recommended videos
 - ✅ Swagger UI with Bearer Token support and persistence on refresh
 
----
-
 ## 🧰 Tech Stack
 
 - **NestJS** (monorepo)
@@ -80,8 +72,6 @@ This project is composed of the following services:
 - **Swagger / OpenAPI**
 - **RabbitMQ** (optional for message passing between services)
 - **OMDB API** integration
-
----
 
 ## ⚙️ Installation
 
