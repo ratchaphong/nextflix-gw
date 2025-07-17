@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Profile" ALTER COLUMN "deletedAt" SET DATA TYPE TIMESTAMP(3);
