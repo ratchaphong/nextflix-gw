@@ -13,9 +13,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // เพิ่ม limit ของ body (default: 100kb)
-  app.use(bodyParser.json({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+  // เพิ่ม limit ของ body (default: 500kb)
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
   // ✅ เปิดใช้งาน class-validator ทั่วทั้งแอป
   app.useGlobalPipes(
