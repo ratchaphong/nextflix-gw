@@ -67,8 +67,7 @@ This project is composed of the following services:
 - **NestJS** (monorepo)
 - **PostgreSQL** via Docker
 - **Prisma ORM**
-- **Swagger / OpenAPI**
-- **RabbitMQ** (optional for message passing between services)
+- **Swagger**
 - **OMDB API** integration
 
 ## ⚙️ Installation

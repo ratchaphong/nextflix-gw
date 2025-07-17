@@ -5,5 +5,9 @@ export class UpdateProfileDto {
   @ApiPropertyOptional({ example: 'Jane Updated' })
   @IsString()
   @IsOptional()
-  name?: string;
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  image: string; // ✅ เพิ่มตรงนี้
 }

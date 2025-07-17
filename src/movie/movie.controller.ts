@@ -10,7 +10,6 @@ import {
 import { MovieService } from './movie.service';
 import {
   ApiTags,
-  ApiResponse,
   ApiParam,
   ApiOkResponse,
   ApiOperation,
@@ -73,16 +72,6 @@ export class MovieController {
     return plainToInstance(VideoItemDto, result);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get movie details by IMDb ID' })
-  @ApiParam({ name: 'id', description: 'IMDb ID', example: 'tt0372784' })
-  @ApiOkResponse({ description: 'Movie details', type: MovieDto })
-  @ApiNotFoundResponse({ description: 'Movie not found.' })
-  async getById(@Param('id') id: string): Promise<MovieDto> {
-    const result = this.movieService.getMovieById(id);
-    return plainToInstance(MovieDto, result);
-  }
-
   @Get('recommended')
   @ApiOperation({ summary: 'Get recommended videos (mock)' })
   @ApiOkResponse({
@@ -93,6 +82,16 @@ export class MovieController {
   async getRecommended(): Promise<VideoItemDto[]> {
     const result = await this.movieService.getRecommendedVideos();
     return plainToInstance(VideoItemDto, result);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get movie details by IMDb ID' })
+  @ApiParam({ name: 'id', description: 'IMDb ID', example: 'tt0372784' })
+  @ApiOkResponse({ description: 'Movie details', type: MovieDto })
+  @ApiNotFoundResponse({ description: 'Movie not found.' })
+  async getById(@Param('id') id: string): Promise<MovieDto> {
+    const result = this.movieService.getMovieById(id);
+    return plainToInstance(MovieDto, result);
   }
 
   @Get('category/:category')

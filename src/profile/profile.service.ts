@@ -25,7 +25,7 @@ export class ProfileService {
 
     return this.prisma.profile.create({
       data: {
-        name: dto.name,
+        ...dto,
         userId,
       },
     });

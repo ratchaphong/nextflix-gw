@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProfileDto {
@@ -6,4 +6,11 @@ export class CreateProfileDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty({
+    example: 'https://example.com/avatar.jpg',
+  })
+  @IsOptional()
+  @IsString()
+  image: string;
 }

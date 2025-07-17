@@ -3,47 +3,54 @@ import { Expose, Type } from 'class-transformer';
 import { Role } from '@prisma/client';
 
 export class ProfileItem {
-  @ApiProperty()
+  @ApiProperty({ example: 'profile-uuid-1234' })
   @Expose()
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'John' })
   @Expose()
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example: 'https://example.com/avatar.jpg',
+    description: 'URL profile image',
+  })
+  @Expose()
+  image?: string;
+
+  @ApiProperty({ example: 'user-uuid-5678' })
   @Expose()
   userId: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2025-07-17T12:34:56.789Z' })
   @Expose()
   createdAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2025-07-17T12:34:56.789Z' })
   @Expose()
   updatedAt: Date;
 }
 
 export class Household {
-  @ApiProperty()
+  @ApiProperty({ example: 'household-uuid-9999' })
   @Expose()
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Smith Family' })
   @Expose()
   name: string;
 }
 
 export class ProfileResponseDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'user-uuid-5678' })
   @Expose()
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'john@example.com' })
   @Expose()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'John Smith' })
   @Expose()
   name: string;
 
