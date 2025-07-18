@@ -10,6 +10,7 @@ import {
   Patch,
   Delete,
   Param,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -30,7 +31,7 @@ import { plainToInstance } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { ProfileResponseDto } from './dto/profile-response.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Auth')
@@ -103,7 +104,9 @@ export class AuthController {
   })
   async login(@Body() dto: LoginDto): Promise<LoginResponseDto> {
     const result = await this.authService.login(dto);
-    return plainToInstance(LoginResponseDto, result);
+    return plainToInstance(LoginResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -189,5 +192,30 @@ export class AuthController {
   async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
     await this.authService.deleteUser(id);
     return { message: 'User deleted successfully' };
+  }
+
+  //
+  @Post('access-token')
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Issue new access token only if it is about to expire',
+  })
+  async getAccessToken(@Req() req: Request): Promise<LoginResponseDto> {
+    const authHeader = req.headers['authorization']; // ✅ lowercase (always lowercase in Express)
+
+    console.log('authHeader =', authHeader);
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Missing Authorization header');
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    console.log('token =', token);
+
+    const result = await this.authService.issueNewAccessToken(token);
+    return plainToInstance(LoginResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 }

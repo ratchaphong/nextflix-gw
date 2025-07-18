@@ -1,4 +1,4 @@
-import { VideoItemDto } from './dto/video-item.dto';
+import { VideoItemDto } from '../movie/dto/video-item.dto';
 
 export const MOCK_RECOMMENDED_VIDEO: VideoItemDto[] = [
   {

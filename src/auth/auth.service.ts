@@ -12,6 +12,8 @@ import { LoginDto } from './dto/login.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '@prisma/client';
+import { JwtPayload } from '../jwt/jwt-payload';
+import { NEAR_EXPIRY_THRESHOLD_SECONDS } from '../utils/auth.utils';
 
 @Injectable()
 export class AuthService {
@@ -98,5 +100,48 @@ export class AuthService {
     if (!exists) throw new NotFoundException('User not found');
 
     await this.prisma.user.delete({ where: { id } });
+  }
+
+  async issueNewAccessToken(oldAccessToken: string) {
+    let payload: JwtPayload;
+    try {
+      payload = this.jwtService.verify(oldAccessToken);
+    } catch (err) {
+      throw new UnauthorizedException('Token expired or invalid');
+    }
+
+    const decoded: JwtPayload = this.jwtService.decode(oldAccessToken);
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const expiresInSeconds = decoded.exp || 0;
+
+    const timeRemaining = expiresInSeconds - nowInSeconds;
+
+    // console.log('🕒 DEBUG TOKEN TIMING:');
+    // console.log('🔸 Now (epoch):', nowInSeconds);
+    // console.log('🔸 Token Exp (epoch):', expiresInSeconds);
+    // console.log('🔸 Time remaining (sec):', timeRemaining);
+    // console.log('🔸 Threshold (sec):', NEAR_EXPIRY_THRESHOLD_SECONDS);
+
+    if (timeRemaining > NEAR_EXPIRY_THRESHOLD_SECONDS) {
+      console.log('❌ Token is NOT near expiry.');
+      throw new UnauthorizedException('Token not near expiry');
+    }
+
+    // console.log('✅ Token is near expiry. Proceed to issue new token.');
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const newAccessToken = this.jwtService.sign({
+      sub: user.id,
+      role: user.role,
+    });
+
+    return { accessToken: newAccessToken };
   }
 }

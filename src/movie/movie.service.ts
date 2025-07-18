@@ -8,7 +8,10 @@ import axios from 'axios';
 import { MovieDto } from './dto/movie.dto';
 import { SearchMovieQueryDto } from './dto/search-movie-query.dto';
 import { VideoItemDto } from './dto/video-item.dto';
-import { MOCK_RECOMMENDED_VIDEO, MOCKUP_FILTER_MOVIES } from './movie.utils';
+import {
+  MOCK_RECOMMENDED_VIDEO,
+  MOCKUP_FILTER_MOVIES,
+} from '../utils/movie.utils';
 import { FilterMovieQueryDto } from './dto/filter-movie-query.dto';
 
 @Injectable()
