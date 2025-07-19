@@ -10,9 +10,12 @@ import { SearchMovieQueryDto } from './dto/search-movie-query.dto';
 import { VideoItemDto } from './dto/video-item.dto';
 import {
   MOCK_RECOMMENDED_VIDEO,
+  MOCK_VIDEO_BY_CATEGORY,
   MOCKUP_FILTER_MOVIES,
 } from '../utils/movie.utils';
 import { FilterMovieQueryDto } from './dto/filter-movie-query.dto';
+import { GetVideosQueryDto } from './dto/get-videos.query.dto';
+import { PaginatedVideoResponseDto } from './dto/paginated-video-response.dto';
 
 @Injectable()
 export class MovieService {
@@ -65,10 +68,49 @@ export class MovieService {
     );
   }
 
-  async getVideosByCategory(category: string): Promise<VideoItemDto[]> {
-    console.log('🔧 Using MOCK getVideosByCategory for:', category);
+  async getVideosByCategory(
+    dto: GetVideosQueryDto,
+  ): Promise<PaginatedVideoResponseDto> {
+    console.log('🔧 Using MOCK getVideosByCategory for:', dto);
+
+    let filtered = [...MOCK_VIDEO_BY_CATEGORY];
+    if (dto.category) {
+      const queryCategory = dto.category.toLowerCase();
+      filtered = filtered.filter((item) =>
+        item.category.some((cat) => cat.toLowerCase() === queryCategory),
+      );
+    }
+
+    const validOrderFields = ['title', 'releaseDate'];
+    const orderBy =
+      dto.orderBy && validOrderFields.includes(dto.orderBy)
+        ? dto.orderBy
+        : 'title';
+    const order = dto.order === 'desc' ? -1 : 1;
+    filtered.sort((a, b) => {
+      const aValue = a[orderBy] ?? '';
+      const bValue = b[orderBy] ?? '';
+      return aValue > bValue ? order : aValue < bValue ? -order : 0;
+    });
+
+    const page = dto.page && !isNaN(Number(dto.page)) ? Number(dto.page) : 1;
+    const perPage =
+      dto.perPage && !isNaN(Number(dto.perPage)) ? Number(dto.perPage) : 10;
+    const total = filtered.length;
+    const start = (page - 1) * perPage;
+    const paginated = filtered.slice(start, start + perPage);
+    const totalPage = Math.ceil(total / perPage);
+
     return new Promise((resolve) =>
-      setTimeout(() => resolve(MOCK_RECOMMENDED_VIDEO), 300),
+      setTimeout(() => {
+        resolve({
+          data: paginated,
+          page,
+          perPage,
+          total,
+          totalPage,
+        });
+      }, 300),
     );
   }
 

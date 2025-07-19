@@ -24,6 +24,8 @@ import { SearchMovieQueryDto } from './dto/search-movie-query.dto';
 import { VideoItemDto } from './dto/video-item.dto';
 import { FilterMovieQueryDto } from './dto/filter-movie-query.dto';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
+import { PaginatedVideoResponseDto } from './dto/paginated-video-response.dto';
+import { GetVideosQueryDto } from './dto/get-videos.query.dto';
 
 @ApiTags('Movies')
 @Controller('movies')
@@ -45,32 +47,32 @@ export class MovieController {
     return plainToInstance(MovieDto, result);
   }
 
-  @Get('filter')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Filter movies by title or genre (from local JSON)',
-  })
-  @ApiOkResponse({
-    description: 'List of matched movies',
-    type: VideoItemDto,
-    isArray: true,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'No or invalid token',
-    schema: {
-      example: {
-        statusCode: 401,
-        message: 'Unauthorized',
-      },
-    },
-  })
-  async filterMovies(
-    @Query() query: FilterMovieQueryDto,
-  ): Promise<VideoItemDto[]> {
-    const result = await this.movieService.filterMovies(query);
-    return plainToInstance(VideoItemDto, result);
-  }
+  // @Get('filter')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({
+  //   summary: 'Filter movies by title or genre (from local JSON)',
+  // })
+  // @ApiOkResponse({
+  //   description: 'List of matched movies',
+  //   type: VideoItemDto,
+  //   isArray: true,
+  // })
+  // @ApiUnauthorizedResponse({
+  //   description: 'No or invalid token',
+  //   schema: {
+  //     example: {
+  //       statusCode: 401,
+  //       message: 'Unauthorized',
+  //     },
+  //   },
+  // })
+  // async filterMovies(
+  //   @Query() query: FilterMovieQueryDto,
+  // ): Promise<VideoItemDto[]> {
+  //   const result = await this.movieService.filterMovies(query);
+  //   return plainToInstance(VideoItemDto, result);
+  // }
 
   @Get('recommended')
   @ApiOperation({ summary: 'Get recommended videos (mock)' })
@@ -81,7 +83,33 @@ export class MovieController {
   })
   async getRecommended(): Promise<VideoItemDto[]> {
     const result = await this.movieService.getRecommendedVideos();
-    return plainToInstance(VideoItemDto, result);
+    return plainToInstance(VideoItemDto, result, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @Get('category')
+  @ApiOperation({
+    summary: 'Get videos (optional category, filters, sort, pagination)',
+  })
+  @ApiOkResponse({
+    description: 'List of videos by category',
+    type: PaginatedVideoResponseDto,
+    isArray: true,
+  })
+  async getByCategory(
+    @Query() query: GetVideosQueryDto,
+  ): Promise<PaginatedVideoResponseDto> {
+    const result = this.movieService.getVideosByCategory({
+      category: query.category,
+      page: query.page ?? 1,
+      perPage: query.perPage ?? 10,
+      orderBy: query.orderBy ?? 'title',
+      order: query.order ?? 'asc',
+    });
+    return plainToInstance(PaginatedVideoResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Get(':id')
@@ -92,24 +120,5 @@ export class MovieController {
   async getById(@Param('id') id: string): Promise<MovieDto> {
     const result = this.movieService.getMovieById(id);
     return plainToInstance(MovieDto, result);
-  }
-
-  @Get('category/:category')
-  @ApiOperation({ summary: 'Get videos by category (mock)' })
-  @ApiParam({
-    name: 'category',
-    example: 'music',
-    description: 'Video category',
-  })
-  @ApiOkResponse({
-    description: 'List of videos by category',
-    type: VideoItemDto,
-    isArray: true,
-  })
-  async getByCategory(
-    @Param('category') category: string,
-  ): Promise<VideoItemDto[]> {
-    const result = await this.movieService.getVideosByCategory(category);
-    return plainToInstance(VideoItemDto, result);
   }
 }
