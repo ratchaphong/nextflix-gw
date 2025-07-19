@@ -328,16 +328,6 @@ export const MOCK_VIDEO_BY_CATEGORY: VideoItemDto[] = [
     releaseDate: '2025-08-08',
   },
   {
-    id: 'husMGbXEIho',
-    title: 'THE MONKEY - Official Redband Trailer',
-    thumbnail: 'https://img.youtube.com/vi/husMGbXEIho/hqdefault.jpg',
-    video: 'https://www.youtube.com/embed/husMGbXEIho?autoplay=1',
-    description:
-      'Based on the Stephen King story, produced by James Wan. Theatrical release Feb 21, 2025.',
-    category: ['Horror', 'Comedy'],
-    releaseDate: '2025-02-21',
-  },
-  {
     id: 'ZgZccxuj2RY',
     title: 'FLOW - Official US Trailer',
     thumbnail: 'https://img.youtube.com/vi/ZgZccxuj2RY/hqdefault.jpg',

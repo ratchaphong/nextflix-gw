@@ -8,6 +8,11 @@ export class GetVideosQueryDto {
   @IsString()
   category?: string;
 
+  @ApiPropertyOptional({ example: 'Thunderbolts*' })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
   @Transform(({ value }) => parseInt(value))

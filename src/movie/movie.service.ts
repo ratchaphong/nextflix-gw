@@ -79,6 +79,11 @@ export class MovieService {
       filtered = filtered.filter((item) =>
         item.category.some((cat) => cat.toLowerCase() === queryCategory),
       );
+    } else if (dto.title) {
+      const queryTitle = dto.title.toLowerCase();
+      filtered = filtered.filter((item) =>
+        item.title.toLowerCase().includes(queryTitle),
+      );
     }
 
     const validOrderFields = ['title', 'releaseDate'];

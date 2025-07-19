@@ -101,7 +101,7 @@ export class MovieController {
     @Query() query: GetVideosQueryDto,
   ): Promise<PaginatedVideoResponseDto> {
     const result = this.movieService.getVideosByCategory({
-      category: query.category,
+      ...query,
       page: query.page ?? 1,
       perPage: query.perPage ?? 10,
       orderBy: query.orderBy ?? 'title',
