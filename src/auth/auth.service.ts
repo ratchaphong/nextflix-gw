@@ -14,12 +14,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '@prisma/client';
 import { JwtPayload } from '../jwt/jwt-payload';
 import { NEAR_EXPIRY_THRESHOLD_SECONDS } from '../utils/auth.utils';
+import { SubscriptionService } from 'src/subscription/subscription.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private subscriptionService: SubscriptionService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -27,6 +29,8 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (exists) throw new ConflictException('Email already used');
+    const defaultPackageId =
+      await this.subscriptionService.getDefaultPackageId();
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
@@ -40,10 +44,8 @@ export class AuthService {
             name: dto.name,
           },
         },
+        subscriptionPackageId: defaultPackageId,
       },
-      // include: {
-      //   profiles: true,
-      // },
     });
 
     return { message: 'Register success', userId: user.id };
@@ -70,6 +72,7 @@ export class AuthService {
         household: {
           include: { members: true },
         },
+        subscriptionPackage: true,
       },
     });
 
@@ -83,7 +86,11 @@ export class AuthService {
       orderBy: { createdAt: 'asc' },
     });
 
-    return { ...user, profiles };
+    return {
+      ...user,
+      package: user.subscriptionPackage,
+      profiles,
+    };
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {

@@ -4,8 +4,8 @@ import { Module } from '@nestjs/common';
 import { MovieModule } from './movie/movie.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -15,6 +15,7 @@ import { ProfileModule } from './profile/profile.module';
     AuthModule,
     MovieModule,
     ProfileModule,
+    SubscriptionModule,
   ],
   // controllers: [AppController],
   // providers: [AppService],

@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -15,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  password  String
-  name      String
-  role      Role
-  profiles  Profile[]
-  household Household?
+  id                    String               @id @default(uuid())
+  email                 String               @unique
+  password              String
+  name                  String
+  role                  Role
+  subscriptionPackageId String?
+  household             Household?
+  profiles              Profile[]
+  subscriptionPackage   SubscriptionPackage? @relation(fields: [subscriptionPackageId], references: [id])
 }
 
 model Household {
@@ -43,11 +38,21 @@ model Profile {
   id        String    @id @default(uuid())
   name      String
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  updatedAt DateTime  @updatedAt
   image     String?
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model SubscriptionPackage {
+  id          String @id @default(uuid())
+  name        String
+  maxProfiles Int
+  maxMembers  Int
+  price       Float
+  resolution  String
+  users       User[]
 }
 
 enum Role {

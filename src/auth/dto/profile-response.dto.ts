@@ -41,6 +41,32 @@ export class Household {
   name: string;
 }
 
+export class SubscriptionPackageDto {
+  @ApiProperty({ example: 'basic-id' })
+  @Expose()
+  id: string;
+
+  @ApiProperty({ example: 'Basic' })
+  @Expose()
+  name: string;
+
+  @ApiProperty({ example: 1 })
+  @Expose()
+  maxProfiles: number;
+
+  @ApiProperty({ example: 1 })
+  @Expose()
+  maxMembers: number;
+
+  @ApiProperty({ example: 0 })
+  @Expose()
+  price: number;
+
+  @ApiProperty({ example: '480p' })
+  @Expose()
+  resolution: string;
+}
+
 export class ProfileResponseDto {
   @ApiProperty({ example: 'user-uuid-5678' })
   @Expose()
@@ -67,4 +93,9 @@ export class ProfileResponseDto {
   @Expose()
   @Type(() => Household)
   household: Household | null;
+
+  @ApiProperty({ type: SubscriptionPackageDto })
+  @Expose()
+  @Type(() => SubscriptionPackageDto)
+  package: SubscriptionPackageDto;
 }
