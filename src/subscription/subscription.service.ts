@@ -16,14 +16,14 @@ export class SubscriptionService {
   }
 
   async getDefaultPackageId(): Promise<string> {
-    const basic = await this.prisma.subscriptionPackage.findUnique({
-      where: { id: 'basic-id' },
+    const premium = await this.prisma.subscriptionPackage.findUnique({
+      where: { id: 'premium-id' },
     });
 
-    if (!basic) {
+    if (!premium) {
       throw new NotFoundException('Default subscription package not found');
     }
 
-    return basic.id;
+    return premium.id;
   }
 }

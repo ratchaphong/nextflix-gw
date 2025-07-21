@@ -1,35 +1,10 @@
 import { PrismaClient } from '@prisma/client';
+import { PACKAGES_DEFAULT } from '../src/utils/pagekage.utils';
+
 const prisma = new PrismaClient();
 
 async function main() {
-  const packages = [
-    {
-      id: 'basic-id',
-      name: 'Basic',
-      maxProfiles: 1,
-      maxMembers: 1,
-      price: 0,
-      resolution: '480p',
-    },
-    {
-      id: 'standard-id',
-      name: 'Standard',
-      maxProfiles: 2,
-      maxMembers: 2,
-      price: 99,
-      resolution: '720p',
-    },
-    {
-      id: 'premium-id',
-      name: 'Premium',
-      maxProfiles: 4,
-      maxMembers: 4,
-      price: 199,
-      resolution: '1080p',
-    },
-  ];
-
-  for (const pkg of packages) {
+  for (const pkg of PACKAGES_DEFAULT) {
     await prisma.subscriptionPackage.upsert({
       where: { id: pkg.id },
       update: {},
@@ -40,11 +15,16 @@ async function main() {
   console.log('📦 Package seeding complete.');
 
   const updated = await prisma.user.updateMany({
-    where: { subscriptionPackageId: null },
-    data: { subscriptionPackageId: 'basic-id' },
+    where: {
+      OR: [
+        { subscriptionPackageId: null },
+        { subscriptionPackageId: 'basic-id' },
+      ],
+    },
+    data: { subscriptionPackageId: 'premium-id' },
   });
 
-  console.log(`👤 Updated ${updated.count} users to have Basic package.`);
+  console.log(`👤 Updated ${updated.count} users to have Premium package.`);
   console.log('✅ Seeding finished.');
 }
 
