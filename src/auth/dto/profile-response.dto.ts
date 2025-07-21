@@ -29,6 +29,13 @@ export class ProfileItem {
   @ApiProperty({ example: '2025-07-17T12:34:56.789Z' })
   @Expose()
   updatedAt: Date;
+
+  @ApiProperty({
+    example: ['QYDza3BLr1w', 'NRtnUVaRwXM', 'HegSBovl24I'],
+    type: [String],
+  })
+  @Expose()
+  favoriteMovieIds: string[];
 }
 
 export class Household {

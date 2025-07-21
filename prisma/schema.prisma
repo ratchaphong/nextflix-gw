@@ -36,14 +36,15 @@ model HouseholdMember {
 }
 
 model Profile {
-  id        String    @id @default(uuid())
-  name      String
-  userId    String
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  updatedAt DateTime  @updatedAt
-  image     String?
-  user      User      @relation(fields: [userId], references: [id])
+  id               String    @id @default(uuid())
+  name             String
+  userId           String
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+  updatedAt        DateTime  @updatedAt
+  image            String?
+  user             User      @relation(fields: [userId], references: [id])
+  favoriteMovieIds String[]  @default([])
 }
 
 model SubscriptionPackage {

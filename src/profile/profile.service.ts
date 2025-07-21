@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ToggleFavoriteMovieDto } from './dto/toggle-favorite.dto';
 
 @Injectable()
 export class ProfileService {
@@ -70,6 +71,42 @@ export class ProfileService {
     return this.prisma.profile.update({
       where: { id: profileId },
       data: { deletedAt: new Date() },
+    });
+  }
+
+  async toggleFavoriteMovie(
+    dto: ToggleFavoriteMovieDto & { profileId: string; userId: string },
+  ) {
+    const { profileId, userId, movieId } = dto;
+    const profile = await this.prisma.profile.findFirst({
+      where: { id: profileId, userId, deletedAt: null },
+    });
+    if (!profile) throw new NotFoundException('Profile not found');
+
+    const favorites = profile.favoriteMovieIds ?? [];
+    const updatedFavorites = favorites.includes(movieId)
+      ? favorites.filter((id) => id !== movieId)
+      : [...favorites, movieId];
+
+    return await this.prisma.profile.update({
+      where: { id: profileId },
+      data: { favoriteMovieIds: updatedFavorites },
+    });
+  }
+
+  async getFavoriteMovies(profileId: string, userId: string) {
+    const profile = await this.prisma.profile.findFirst({
+      where: { id: profileId, userId, deletedAt: null },
+    });
+    if (!profile) throw new NotFoundException('Profile not found');
+
+    if (!profile.favoriteMovieIds?.length) return [];
+
+    return await this.prisma.movie.findMany({
+      where: {
+        id: { in: profile.favoriteMovieIds },
+        deletedAt: null,
+      },
     });
   }
 }

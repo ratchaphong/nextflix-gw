@@ -7,6 +7,7 @@ import {
   Patch,
   Param,
   Delete,
+  Get,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -24,6 +25,8 @@ import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileService } from './profile.service';
+import { FavoriteMovieItem } from './dto/favorite-movie-response.dto';
+import { ToggleFavoriteMovieDto } from './dto/toggle-favorite.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -64,6 +67,28 @@ export class ProfileController {
     });
   }
 
+  @Patch(':id/favorite')
+  @ApiOperation({ summary: 'Toggle favorite movie (add/remove)' })
+  @ApiOkResponse({
+    description: 'Profile favorite updated successfully',
+    type: ProfileItem,
+  })
+  @ApiBadRequestResponse({ description: 'Invalid movie ID or profile' })
+  async toggleFavorite(
+    @Param('id') profileId: string,
+    @Req() req,
+    @Body() dto: ToggleFavoriteMovieDto,
+  ) {
+    const updatedProfile = await this.profileService.toggleFavoriteMovie({
+      ...dto,
+      profileId,
+      userId: req.user.sub,
+    });
+    return plainToInstance(ProfileItem, updatedProfile, {
+      excludeExtraneousValues: true,
+    });
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update profile by ID' })
   @ApiOkResponse({
@@ -100,6 +125,23 @@ export class ProfileController {
       dto,
     );
     return plainToInstance(ProfileItem, profile, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @Get(':id/favorites')
+  @ApiOperation({ summary: 'Get all favorite movies of a profile' })
+  @ApiOkResponse({
+    description: 'Favorite movies retrieved successfully',
+    type: FavoriteMovieItem,
+    isArray: true,
+  })
+  async getFavorites(@Param('id') profileId: string, @Req() req) {
+    const movies = await this.profileService.getFavoriteMovies(
+      profileId,
+      req.user.sub,
+    );
+    return plainToInstance(FavoriteMovieItem, movies, {
       excludeExtraneousValues: true,
     });
   }

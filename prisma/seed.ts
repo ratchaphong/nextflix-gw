@@ -7,6 +7,11 @@ import {
 
 const prisma = new PrismaClient();
 
+const toValidDate = (dateStr?: string): Date | undefined => {
+  if (!dateStr || isNaN(Date.parse(dateStr))) return undefined;
+  return new Date(dateStr);
+};
+
 async function main() {
   for (const pkg of PACKAGES_DEFAULT) {
     await prisma.subscriptionPackage.upsert({
@@ -34,11 +39,6 @@ async function main() {
   // console.log('🗑️ Deleted all existing movies');
 
   // Seed Movies if not exist
-  const toValidDate = (dateStr?: string): Date | undefined => {
-    if (!dateStr || isNaN(Date.parse(dateStr))) return undefined;
-    return new Date(dateStr);
-  };
-
   const movieCount = await prisma.movie.count();
   if (movieCount === 0) {
     const movies = [...MOCK_RECOMMENDED_VIDEO, ...MOCK_VIDEO_BY_CATEGORY];
