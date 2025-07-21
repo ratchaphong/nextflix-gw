@@ -68,6 +68,19 @@ model LoginLog {
   createdAt DateTime @default(now())
 }
 
+model Movie {
+  id          String    @id @default(uuid())
+  title       String
+  thumbnail   String
+  video       String
+  description String
+  category    String[]
+  releaseDate DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
 enum Role {
   OWNER
   MEMBER

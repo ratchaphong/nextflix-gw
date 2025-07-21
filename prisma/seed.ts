@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { PACKAGES_DEFAULT } from '../src/utils/pagekage.utils';
+import {
+  MOCK_RECOMMENDED_VIDEO,
+  MOCK_VIDEO_BY_CATEGORY,
+} from '../src/utils/movie.utils';
 
 const prisma = new PrismaClient();
 
@@ -25,6 +29,32 @@ async function main() {
   });
 
   console.log(`👤 Updated ${updated.count} users to have Premium package.`);
+
+  // await prisma.movie.deleteMany({});
+  // console.log('🗑️ Deleted all existing movies');
+
+  // Seed Movies if not exist
+  const toValidDate = (dateStr?: string): Date | undefined => {
+    if (!dateStr || isNaN(Date.parse(dateStr))) return undefined;
+    return new Date(dateStr);
+  };
+
+  const movieCount = await prisma.movie.count();
+  if (movieCount === 0) {
+    const movies = [...MOCK_RECOMMENDED_VIDEO, ...MOCK_VIDEO_BY_CATEGORY];
+    for (const movie of movies) {
+      await prisma.movie.create({
+        data: {
+          ...movie,
+          releaseDate: toValidDate(movie.releaseDate),
+        },
+      });
+    }
+    console.log(`🎬 Seeded ${movies.length} movies.`);
+  } else {
+    console.log('🎬 Movies already exist. Skipping seeding.');
+  }
+
   console.log('✅ Seeding finished.');
 }
 

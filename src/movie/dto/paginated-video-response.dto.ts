@@ -22,5 +22,5 @@ export class PaginatedVideoResponseDto {
 
   @ApiProperty()
   @Expose()
-  totalPage: number; // ✅ เพิ่มตรงนี้
+  totalPage: number;
 }

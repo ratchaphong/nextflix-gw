@@ -4,7 +4,9 @@ import {
   Get,
   Query,
   Param,
-  ParseUUIDPipe,
+  Body,
+  Post,
+  HttpCode,
   UseGuards,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
@@ -17,15 +19,16 @@ import {
   ApiNotFoundResponse,
   ApiBearerAuth,
   ApiUnauthorizedResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { MovieDto } from './dto/movie.dto';
 import { plainToInstance } from 'class-transformer';
 import { SearchMovieQueryDto } from './dto/search-movie-query.dto';
 import { VideoItemDto } from './dto/video-item.dto';
-import { FilterMovieQueryDto } from './dto/filter-movie-query.dto';
-import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { PaginatedVideoResponseDto } from './dto/paginated-video-response.dto';
 import { GetVideosQueryDto } from './dto/get-videos.query.dto';
+import { CreateMovieDto } from './dto/create-movie.dto';
+import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 
 @ApiTags('Movies')
 @Controller('movies')
@@ -46,33 +49,6 @@ export class MovieController {
     const result = await this.movieService.searchMovies(query);
     return plainToInstance(MovieDto, result);
   }
-
-  // @Get('filter')
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
-  // @ApiOperation({
-  //   summary: 'Filter movies by title or genre (from local JSON)',
-  // })
-  // @ApiOkResponse({
-  //   description: 'List of matched movies',
-  //   type: VideoItemDto,
-  //   isArray: true,
-  // })
-  // @ApiUnauthorizedResponse({
-  //   description: 'No or invalid token',
-  //   schema: {
-  //     example: {
-  //       statusCode: 401,
-  //       message: 'Unauthorized',
-  //     },
-  //   },
-  // })
-  // async filterMovies(
-  //   @Query() query: FilterMovieQueryDto,
-  // ): Promise<VideoItemDto[]> {
-  //   const result = await this.movieService.filterMovies(query);
-  //   return plainToInstance(VideoItemDto, result);
-  // }
 
   @Get('recommended')
   @ApiOperation({ summary: 'Get recommended videos (mock)' })
@@ -119,6 +95,29 @@ export class MovieController {
   @ApiNotFoundResponse({ description: 'Movie not found.' })
   async getById(@Param('id') id: string): Promise<MovieDto> {
     const result = this.movieService.getMovieById(id);
+    return plainToInstance(MovieDto, result);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Create new movie' })
+  @ApiCreatedResponse({
+    description: 'Create new movie',
+    type: VideoItemDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'No or invalid token',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  async create(@Body() dto: CreateMovieDto) {
+    const result = this.movieService.create(dto);
     return plainToInstance(MovieDto, result);
   }
 }

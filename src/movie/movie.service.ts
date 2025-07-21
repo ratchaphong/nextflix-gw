@@ -7,27 +7,29 @@ import {
 import axios from 'axios';
 import { MovieDto } from './dto/movie.dto';
 import { SearchMovieQueryDto } from './dto/search-movie-query.dto';
-import { VideoItemDto } from './dto/video-item.dto';
-import {
-  MOCK_RECOMMENDED_VIDEO,
-  MOCK_VIDEO_BY_CATEGORY,
-  MOCKUP_FILTER_MOVIES,
-} from '../utils/movie.utils';
-import { FilterMovieQueryDto } from './dto/filter-movie-query.dto';
 import { GetVideosQueryDto } from './dto/get-videos.query.dto';
-import { PaginatedVideoResponseDto } from './dto/paginated-video-response.dto';
+import { CreateMovieDto } from './dto/create-movie.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MovieService {
+  constructor(private prisma: PrismaService) {}
+
   private readonly OMDB_API_KEY = process.env.OMDB_API_KEY;
+  private readonly OMDB_URL = process.env.OMDB_URL || `https://www.omdbapi.com`;
 
   async searchMovies(query: SearchMovieQueryDto): Promise<MovieDto[]> {
     if (!query.q?.trim()) {
       throw new BadRequestException('Search query (q) cannot be empty.');
     }
 
-    const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query.q)}&apikey=${this.OMDB_API_KEY}`;
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(this.OMDB_URL, {
+      params: {
+        s: query.q,
+        apikey: this.OMDB_API_KEY,
+      },
+    });
 
     if (data.Response === 'True' && Array.isArray(data.Search)) {
       return data.Search.map((item: any) => ({
@@ -44,8 +46,12 @@ export class MovieService {
   }
 
   async getMovieById(imdbID: string): Promise<MovieDto> {
-    const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${this.OMDB_API_KEY}`;
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(this.OMDB_URL, {
+      params: {
+        i: imdbID,
+        apikey: this.OMDB_API_KEY,
+      },
+    });
 
     if (data.Response === 'True') {
       return {
@@ -61,89 +67,76 @@ export class MovieService {
     throw new NotFoundException(data.Error || 'Movie not found.');
   }
 
-  async getRecommendedVideos(): Promise<VideoItemDto[]> {
-    console.log('🔧 Using MOCK getRecommendedVideos');
-    return new Promise((resolve) =>
-      setTimeout(() => resolve(MOCK_RECOMMENDED_VIDEO), 300),
-    );
-  }
-
-  async getVideosByCategory(
-    dto: GetVideosQueryDto,
-  ): Promise<PaginatedVideoResponseDto> {
-    console.log('🔧 Using MOCK getVideosByCategory for:', dto);
-
-    let filtered = [...MOCK_VIDEO_BY_CATEGORY];
-    if (dto.category) {
-      const queryCategory = dto.category.toLowerCase();
-      filtered = filtered.filter((item) =>
-        item.category.some((cat) => cat.toLowerCase() === queryCategory),
-      );
-    } else if (dto.title) {
-      const queryTitle = dto.title.toLowerCase();
-      filtered = filtered.filter((item) =>
-        item.title.toLowerCase().includes(queryTitle),
-      );
-    }
-
-    const validOrderFields = ['title', 'releaseDate'];
-    const orderBy =
-      dto.orderBy && validOrderFields.includes(dto.orderBy)
-        ? dto.orderBy
-        : 'title';
-    const order = dto.order === 'desc' ? -1 : 1;
-    filtered.sort((a, b) => {
-      const aValue = a[orderBy] ?? '';
-      const bValue = b[orderBy] ?? '';
-      return aValue > bValue ? order : aValue < bValue ? -order : 0;
+  async getRecommendedVideos() {
+    const recommended = await this.prisma.movie.findMany({
+      where: {
+        releaseDate: null,
+        deletedAt: null,
+        category: {
+          equals: [],
+        },
+      },
+      orderBy: {
+        releaseDate: 'desc',
+      },
     });
 
-    const page = dto.page && !isNaN(Number(dto.page)) ? Number(dto.page) : 1;
-    const perPage =
-      dto.perPage && !isNaN(Number(dto.perPage)) ? Number(dto.perPage) : 10;
+    return recommended;
+  }
+
+  async getVideosByCategory(dto: GetVideosQueryDto) {
+    const {
+      title,
+      category,
+      orderBy = 'title',
+      order = 'asc',
+      page = 1,
+      perPage = 10,
+    } = dto;
+
+    const where: Prisma.MovieWhereInput = {
+      deletedAt: null,
+      ...(title && {
+        title: {
+          contains: title,
+          mode: 'insensitive',
+        },
+      }),
+      ...(category && {
+        category: {
+          has: category,
+        },
+      }),
+    };
+
+    const sortBy = ['title', 'releaseDate'].includes(orderBy)
+      ? orderBy
+      : 'title';
+
+    const result = await this.prisma.movie.findMany({
+      where,
+      orderBy: {
+        [sortBy]: order.toLowerCase() === 'desc' ? 'desc' : 'asc',
+      },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    });
+
+    const filtered = result.filter((m) => m.category.length > 0);
+
     const total = filtered.length;
-    const start = (page - 1) * perPage;
-    const paginated = filtered.slice(start, start + perPage);
     const totalPage = Math.ceil(total / perPage);
 
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve({
-          data: paginated,
-          page,
-          perPage,
-          total,
-          totalPage,
-        });
-      }, 300),
-    );
+    return {
+      data: filtered,
+      page,
+      perPage,
+      total,
+      totalPage,
+    };
   }
 
-  async filterMovies(query: FilterMovieQueryDto): Promise<MovieDto[]> {
-    const { title } = query;
-
-    const filtered = MOCKUP_FILTER_MOVIES.filter((movie) => {
-      const matchesTitle = title
-        ? (movie.Title?.toLowerCase().includes(title.toLowerCase()) ?? false)
-        : true;
-
-      return matchesTitle;
-    });
-
-    const transformed = filtered.map((movie) => ({
-      id: movie.Id.toString(),
-      title: movie.Title,
-      year: movie.Year,
-      image:
-        'https://via.placeholder.com/300x450?text=' +
-        encodeURIComponent(movie.Title),
-      description: movie.Description ?? 'No description available.',
-      ageRating: 'N/A',
-      tags: movie.Genres
-        ? (movie.Genres as string).split(',').map((g: string) => g.trim())
-        : [],
-    }));
-
-    return transformed;
+  create(data: CreateMovieDto) {
+    return this.prisma.movie.create({ data });
   }
 }
