@@ -15,6 +15,7 @@ import { Role } from '@prisma/client';
 import { JwtPayload } from '../jwt/jwt-payload';
 import { NEAR_EXPIRY_THRESHOLD_SECONDS } from '../utils/auth.utils';
 import { SubscriptionService } from 'src/subscription/subscription.service';
+import { LoginLogService } from 'src/login-log/login-log.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private subscriptionService: SubscriptionService,
+    private loginLogService: LoginLogService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -59,6 +61,10 @@ export class AuthService {
 
     const match = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new UnauthorizedException('Invalid credentials');
+
+    await this.loginLogService.create({
+      userId: user.id,
+    });
 
     const token = this.jwtService.sign({ sub: user.id, role: user.role });
 

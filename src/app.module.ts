@@ -9,6 +9,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { CronService } from './cron/cron.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LoginLogModule } from './login-log/login-log.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ProfileModule,
     SubscriptionModule,
     PrismaModule,
+    LoginLogModule,
   ],
   providers: [CronService],
   // controllers: [AppController],

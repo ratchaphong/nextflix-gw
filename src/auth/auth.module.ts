@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from '../jwt/jwt.strategy';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { LoginLogModule } from 'src/login-log/login-log.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SubscriptionModule } from 'src/subscription/subscription.module';
     }),
     PrismaModule,
     SubscriptionModule,
+    LoginLogModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

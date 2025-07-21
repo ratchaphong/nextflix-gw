@@ -17,6 +17,7 @@ model User {
   household             Household?
   profiles              Profile[]
   subscriptionPackage   SubscriptionPackage? @relation(fields: [subscriptionPackageId], references: [id])
+  LoginLog              LoginLog[]
 }
 
 model Household {
@@ -56,6 +57,15 @@ model SubscriptionPackage {
   deletedAt   DateTime?
   updatedAt   DateTime? @updatedAt
   users       User[]
+}
+
+model LoginLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
 }
 
 enum Role {

@@ -45,6 +45,19 @@ export class CronService {
     );
   }
 
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  async clearOldLoginLogs() {
+    this.logger.log('🧹 Running clead old logs cleanup...');
+
+    const cutoff = new Date(Date.now() - THIRTY_DAYS_IN_MS);
+    const deletedOldLoginLogs = await this.prisma.loginLog.deleteMany({
+      where: { createdAt: { lt: cutoff } },
+    });
+    this.logger.log(
+      `🧹 Deleted ${deletedOldLoginLogs.count} login logs older than 30 days.`,
+    );
+  }
+
   //   @Cron('*/15 * * * * *')
   //   async countUsersEvery15Seconds() {
   //     const count = await this.prisma.user.count();
