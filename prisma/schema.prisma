@@ -46,12 +46,15 @@ model Profile {
 }
 
 model SubscriptionPackage {
-  id          String @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   maxProfiles Int
   maxMembers  Int
   price       Float
   resolution  String
+  createdAt   DateTime? @default(now())
+  deletedAt   DateTime?
+  updatedAt   DateTime? @updatedAt
   users       User[]
 }
 
