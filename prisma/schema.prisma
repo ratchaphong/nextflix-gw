@@ -18,6 +18,7 @@ model User {
   household             Household?
   loginLog              LoginLog[]
   member                HouseholdMember?
+  packageExpiredAt      DateTime?
 }
 
 // User (N) → (1) SubscriptionPackage    [User = child]

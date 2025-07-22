@@ -14,7 +14,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '@prisma/client';
 import { JwtPayload } from '../jwt/jwt-payload';
-import { NEAR_EXPIRY_THRESHOLD_SECONDS } from '../utils/auth.utils';
+import {
+  NEAR_EXPIRY_THRESHOLD_SECONDS,
+  THIRTY_DAYS,
+} from '../utils/auth.utils';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { LoginLogService } from 'src/login-log/login-log.service';
 import { InviteDto } from './dto/invite.dto';
@@ -40,6 +43,7 @@ export class AuthService {
     const hashed = await bcrypt.hash(dto.password, 10);
 
     // 1. สร้าง user
+    const now = new Date();
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
@@ -47,6 +51,7 @@ export class AuthService {
         password: hashed,
         role: Role.OWNER,
         subscriptionPackageId: defaultPackageId,
+        packageExpiredAt: new Date(now.getTime() + THIRTY_DAYS),
       },
     });
 
@@ -86,6 +91,10 @@ export class AuthService {
 
     const match = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new UnauthorizedException('Invalid credentials');
+
+    if (user.packageExpiredAt && user.packageExpiredAt < new Date()) {
+      throw new UnauthorizedException('Invalid credentials or expired package');
+    }
 
     await this.loginLogService.create({}, user.id);
 
@@ -142,10 +151,7 @@ export class AuthService {
     });
 
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
+      ...user,
       household,
       package: subscriptionPackage,
       profiles,
@@ -266,5 +272,30 @@ export class AuthService {
       message: 'Invite successful',
       userId: user.id,
     };
+  }
+
+  async renewSubscription(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const now = new Date();
+
+    const currentExpiry = user.packageExpiredAt;
+    const newExpiry =
+      currentExpiry && currentExpiry > now
+        ? new Date(currentExpiry.getTime() + THIRTY_DAYS)
+        : new Date(now.getTime() + THIRTY_DAYS);
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { packageExpiredAt: newExpiry },
+    });
+
+    return { packageExpiredAt: updatedUser.packageExpiredAt };
   }
 }

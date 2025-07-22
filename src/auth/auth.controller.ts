@@ -34,6 +34,8 @@ import { RegisterResponseDto } from './dto/register-response.dto';
 import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InviteDto } from './dto/invite.dto';
+import { RenewSubscriptionDto } from './dto/renew-subscription.dto';
+import { RenewSubscriptionResponseDto } from './dto/renew-subscription-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -84,7 +86,7 @@ export class AuthController {
       'Authenticates user credentials and returns an access token on success.',
   })
   @ApiUnauthorizedResponse({
-    description: 'Invalid credentials',
+    description: 'Invalid credentials or expired package',
     schema: {
       example: {
         statusCode: 401,
@@ -255,5 +257,34 @@ export class AuthController {
   ): Promise<RegisterResponseDto> {
     const result = await this.authService.invite(req.user.sub, dto);
     return plainToInstance(RegisterResponseDto, result);
+  }
+
+  @Post('renew')
+  @ApiOperation({ summary: 'Renew user subscription by 30 days' })
+  @ApiOkResponse({
+    description: 'Renewed successfully',
+    schema: {
+      example: {
+        packageExpiredAt: '2025-08-22T00:00:00.000Z',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'User not found',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'User not found',
+        error: 'Bad Request',
+      },
+    },
+  })
+  async renew(
+    @Body() dto: RenewSubscriptionDto,
+  ): Promise<RenewSubscriptionResponseDto> {
+    const result = await this.authService.renewSubscription(dto.userId);
+    return plainToInstance(RenewSubscriptionResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 }

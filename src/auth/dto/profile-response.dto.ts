@@ -99,4 +99,8 @@ export class ProfileResponseDto {
   @Expose()
   @Type(() => SubscriptionPackageDto)
   package: SubscriptionPackageDto;
+
+  @ApiProperty({ example: '2025-08-22T00:00:00.000Z' })
+  @Expose()
+  packageExpiredAt: Date;
 }

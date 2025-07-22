@@ -58,6 +58,22 @@ export class CronService {
     );
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async disableExpiredUsers() {
+    const now = new Date();
+    const expiredUsers = await this.prisma.user.findMany({
+      where: {
+        packageExpiredAt: {
+          lt: now,
+        },
+      },
+    });
+
+    for (const user of expiredUsers) {
+      this.logger.log(`🚫 User ${user.email} subscription expired.`);
+    }
+  }
+
   //   @Cron('*/15 * * * * *')
   //   async countUsersEvery15Seconds() {
   //     const count = await this.prisma.user.count();
