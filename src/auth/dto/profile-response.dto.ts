@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { Role } from '@prisma/client';
+import { SubscriptionPackageDto } from 'src/subscription/dto/sub-scription-package.dto';
 
 export class ProfileItem {
   @ApiProperty({ example: 'profile-uuid-1234' })
@@ -18,9 +19,9 @@ export class ProfileItem {
   @Expose()
   image?: string;
 
-  @ApiProperty({ example: 'user-uuid-5678' })
+  @ApiProperty({ example: 'household-uuid-9999' })
   @Expose()
-  userId: string;
+  householdMemberId: string;
 
   @ApiProperty({ example: '2025-07-17T12:34:56.789Z' })
   @Expose()
@@ -38,6 +39,20 @@ export class ProfileItem {
   favoriteMovieIds: string[];
 }
 
+export class HouseholdMemberDto {
+  @ApiProperty({ example: 'member-uuid-1234' })
+  @Expose()
+  id: string;
+
+  @ApiProperty({ example: 'John' })
+  @Expose()
+  name: string;
+
+  @ApiProperty({ example: 'user-uuid-5678' })
+  @Expose()
+  userId: string;
+}
+
 export class Household {
   @ApiProperty({ example: 'household-uuid-9999' })
   @Expose()
@@ -46,32 +61,11 @@ export class Household {
   @ApiProperty({ example: 'Smith Family' })
   @Expose()
   name: string;
-}
 
-export class SubscriptionPackageDto {
-  @ApiProperty({ example: 'basic-id' })
+  @ApiProperty({ type: [HouseholdMemberDto] })
   @Expose()
-  id: string;
-
-  @ApiProperty({ example: 'Basic' })
-  @Expose()
-  name: string;
-
-  @ApiProperty({ example: 1 })
-  @Expose()
-  maxProfiles: number;
-
-  @ApiProperty({ example: 1 })
-  @Expose()
-  maxMembers: number;
-
-  @ApiProperty({ example: 0 })
-  @Expose()
-  price: number;
-
-  @ApiProperty({ example: '480p' })
-  @Expose()
-  resolution: string;
+  @Type(() => HouseholdMemberDto)
+  members: HouseholdMemberDto[];
 }
 
 export class ProfileResponseDto {

@@ -23,18 +23,6 @@ async function main() {
 
   console.log('📦 Package seeding complete.');
 
-  const updated = await prisma.user.updateMany({
-    where: {
-      OR: [
-        { subscriptionPackageId: null },
-        { subscriptionPackageId: 'basic-id' },
-      ],
-    },
-    data: { subscriptionPackageId: 'premium-id' },
-  });
-
-  console.log(`👤 Updated ${updated.count} users to have Premium package.`);
-
   // await prisma.movie.deleteMany({});
   // console.log('🗑️ Deleted all existing movies');
 

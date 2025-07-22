@@ -1,8 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
-import { SubscriptionPackageDto } from 'src/auth/dto/profile-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { SubscriptionPackageDto } from './dto/sub-scription-package.dto';
 
 @ApiTags('Subscription Packages')
 @Controller('subscriptions')

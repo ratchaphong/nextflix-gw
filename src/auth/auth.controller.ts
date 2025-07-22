@@ -33,6 +33,7 @@ import { ProfileResponseDto } from './dto/profile-response.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InviteDto } from './dto/invite.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -194,7 +195,6 @@ export class AuthController {
     return { message: 'User deleted successfully' };
   }
 
-  //
   @Post('access-token')
   @ApiBearerAuth()
   @HttpCode(200)
@@ -217,5 +217,43 @@ export class AuthController {
     return plainToInstance(LoginResponseDto, result, {
       excludeExtraneousValues: true,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('invite')
+  @HttpCode(201)
+  @ApiOperation({
+    summary: 'Invite a member to join household',
+    description:
+      'Allows OWNER to invite a MEMBER to their household. Creates user, member, and default profile.',
+  })
+  @ApiCreatedResponse({ type: RegisterResponseDto })
+  @ApiConflictResponse({
+    description: 'Email already used',
+    schema: {
+      example: {
+        statusCode: 409,
+        message: 'Email already used',
+        error: 'Conflict',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Validation failed',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: ['email must be an email', 'name should not be empty'],
+        error: 'Bad Request',
+      },
+    },
+  })
+  async invite(
+    @Req() req,
+    @Body() dto: InviteDto,
+  ): Promise<RegisterResponseDto> {
+    const result = await this.authService.invite(req.user.sub, dto);
+    return plainToInstance(RegisterResponseDto, result);
   }
 }

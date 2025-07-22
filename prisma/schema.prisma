@@ -15,9 +15,9 @@ model User {
   role                  Role
   subscriptionPackageId String?
   household             Household?
-  profiles              Profile[]
   subscriptionPackage   SubscriptionPackage? @relation(fields: [subscriptionPackageId], references: [id])
   LoginLog              LoginLog[]
+  member                HouseholdMember?
 }
 
 model Household {
@@ -33,18 +33,21 @@ model HouseholdMember {
   name        String
   householdId String
   household   Household @relation(fields: [householdId], references: [id])
+  userId      String?   @unique
+  user        User?     @relation(fields: [userId], references: [id])
+  Profile     Profile[]
 }
 
 model Profile {
-  id               String    @id @default(uuid())
-  name             String
-  userId           String
-  createdAt        DateTime  @default(now())
-  deletedAt        DateTime?
-  updatedAt        DateTime  @updatedAt
-  image            String?
-  user             User      @relation(fields: [userId], references: [id])
-  favoriteMovieIds String[]  @default([])
+  id                String           @id @default(uuid())
+  name              String
+  createdAt         DateTime         @default(now())
+  deletedAt         DateTime?
+  updatedAt         DateTime         @updatedAt
+  image             String?
+  favoriteMovieIds  String[]         @default([])
+  householdMemberId String?
+  householdMember   HouseholdMember? @relation(fields: [householdMemberId], references: [id])
 }
 
 model SubscriptionPackage {

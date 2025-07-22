@@ -1,5 +1,6 @@
 // src/auth/auth.service.ts
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -16,6 +17,7 @@ import { JwtPayload } from '../jwt/jwt-payload';
 import { NEAR_EXPIRY_THRESHOLD_SECONDS } from '../utils/auth.utils';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { LoginLogService } from 'src/login-log/login-log.service';
+import { InviteDto } from './dto/invite.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,22 +33,45 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (exists) throw new ConflictException('Email already used');
+
     const defaultPackageId =
       await this.subscriptionService.getDefaultPackageId();
 
     const hashed = await bcrypt.hash(dto.password, 10);
+
+    // 1. สร้าง user
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
         name: dto.name,
         password: hashed,
         role: Role.OWNER,
-        profiles: {
-          create: {
-            name: dto.name,
-          },
-        },
         subscriptionPackageId: defaultPackageId,
+      },
+    });
+
+    // 2. สร้าง household
+    const household = await this.prisma.household.create({
+      data: {
+        name: `${dto.name}'s Household`,
+        userId: user.id,
+      },
+    });
+
+    // ✅ 3. สร้าง householdMember (default) + เชื่อม userId
+    const member = await this.prisma.householdMember.create({
+      data: {
+        name: dto.name,
+        householdId: household.id,
+        userId: user.id,
+      },
+    });
+
+    // 4. สร้าง profile เชื่อมกับ householdMember
+    await this.prisma.profile.create({
+      data: {
+        name: dto.name,
+        householdMemberId: member.id,
       },
     });
 
@@ -78,23 +103,53 @@ export class AuthService {
         household: {
           include: { members: true },
         },
+        member: {
+          include: {
+            household: {
+              include: {
+                members: true,
+                user: { include: { subscriptionPackage: true } },
+              },
+            },
+          },
+        },
         subscriptionPackage: true,
       },
     });
 
     if (!user) throw new NotFoundException('User not found');
 
+    // ✅ หา household จาก OWNER หรือ MEMBER
+    const household = user.household ?? user.member?.household;
+    if (!household) throw new NotFoundException('Household not found');
+
+    // ✅ หา package จาก OWNER (กรณี MEMBER จะเป็นของ user เจ้าของ household)
+    const subscriptionPackage =
+      user.role === Role.OWNER
+        ? user.subscriptionPackage
+        : user.member?.household?.user.subscriptionPackage;
+
+    const memberIds = household.members.map((m) => m.id);
+
     const profiles = await this.prisma.profile.findMany({
       where: {
-        userId,
+        householdMemberId: {
+          in: memberIds,
+        },
         deletedAt: null,
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
 
     return {
-      ...user,
-      package: user.subscriptionPackage,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      household,
+      package: subscriptionPackage,
       profiles,
     };
   }
@@ -156,5 +211,62 @@ export class AuthService {
     });
 
     return { accessToken: newAccessToken };
+  }
+
+  async invite(ownerId: string, dto: InviteDto) {
+    const exists = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (exists) throw new ConflictException('Email already used');
+
+    const hashed = await bcrypt.hash(dto.password, 10);
+
+    const household = await this.prisma.household.findUnique({
+      where: { userId: ownerId },
+    });
+    if (!household) throw new NotFoundException('Household not found');
+
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+      include: { subscriptionPackage: true },
+    });
+
+    const memberCount = await this.prisma.householdMember.count({
+      where: { householdId: household.id },
+    });
+
+    const maxMembers = owner?.subscriptionPackage?.maxMembers ?? 4;
+    if (memberCount >= maxMembers) {
+      throw new BadRequestException('Cannot add more household members');
+    }
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        name: dto.name,
+        password: hashed,
+        role: Role.MEMBER,
+      },
+    });
+
+    const member = await this.prisma.householdMember.create({
+      data: {
+        name: dto.name,
+        householdId: household.id,
+        userId: user.id,
+      },
+    });
+
+    await this.prisma.profile.create({
+      data: {
+        name: dto.name,
+        householdMemberId: member.id,
+      },
+    });
+
+    return {
+      message: 'Invite successful',
+      userId: user.id,
+    };
   }
 }
