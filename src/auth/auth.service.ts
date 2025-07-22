@@ -87,9 +87,7 @@ export class AuthService {
     const match = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new UnauthorizedException('Invalid credentials');
 
-    await this.loginLogService.create({
-      userId: user.id,
-    });
+    await this.loginLogService.create({}, user.id);
 
     const token = this.jwtService.sign({ sub: user.id, role: user.role });
 
