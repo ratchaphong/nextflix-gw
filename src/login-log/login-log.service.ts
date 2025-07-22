@@ -6,8 +6,10 @@ import { CreateLoginLogDto } from './dto/create-login-log.dto';
 export class LoginLogService {
   constructor(private prisma: PrismaService) {}
 
-  create(data: CreateLoginLogDto & { userId: string }) {
-    return this.prisma.loginLog.create({ data });
+  create(data: CreateLoginLogDto, userId: string) {
+    return this.prisma.loginLog.create({
+      data: { ...data, userId: userId },
+    });
   }
 
   findAll() {

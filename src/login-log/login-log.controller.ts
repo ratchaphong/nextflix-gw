@@ -26,7 +26,7 @@ export class LoginLogController {
   })
   async create(@Body() dto: CreateLoginLogDto, @Req() req) {
     const userId = req.user.sub;
-    const result = await this.service.create({ ...dto, userId });
+    const result = await this.service.create(dto, userId);
     return plainToInstance(LoginLogResponseDto, result);
   }
 

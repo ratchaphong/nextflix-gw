@@ -14,11 +14,15 @@ model User {
   name                  String
   role                  Role
   subscriptionPackageId String?
-  household             Household?
   subscriptionPackage   SubscriptionPackage? @relation(fields: [subscriptionPackageId], references: [id])
-  LoginLog              LoginLog[]
+  household             Household?
+  loginLog              LoginLog[]
   member                HouseholdMember?
 }
+
+// User (N) → (1) SubscriptionPackage    [User = child]
+// User (1) → (1) Household              [User = parent]
+// User (1) → (N) LoginLog               [User = parent]
 
 model Household {
   id      String            @id @default(uuid())
@@ -27,6 +31,8 @@ model Household {
   user    User              @relation(fields: [userId], references: [id])
   members HouseholdMember[]
 }
+
+// Household (1) → (1) User   [Household = child]
 
 model HouseholdMember {
   id          String    @id @default(uuid())
@@ -37,6 +43,9 @@ model HouseholdMember {
   user        User?     @relation(fields: [userId], references: [id])
   Profile     Profile[]
 }
+
+// HouseholdMember (1) → (1) Household   [HouseholdMember = child]
+// HouseholdMember (1) → (1) User   [HouseholdMember = child]
 
 model Profile {
   id                String           @id @default(uuid())
@@ -49,6 +58,8 @@ model Profile {
   householdMemberId String?
   householdMember   HouseholdMember? @relation(fields: [householdMemberId], references: [id])
 }
+
+// Profile (N) → (1) HouseholdMember   [Profile = child]
 
 model SubscriptionPackage {
   id          String    @id @default(uuid())
@@ -63,6 +74,8 @@ model SubscriptionPackage {
   users       User[]
 }
 
+// SubscriptionPackage (1) → (N) User   [SubscriptionPackage = parent]
+
 model LoginLog {
   id        String   @id @default(uuid())
   userId    String
@@ -71,6 +84,8 @@ model LoginLog {
   userAgent String?
   createdAt DateTime @default(now())
 }
+
+// LoginLog (N) → (1) User   [LoginLog = child]
 
 model Movie {
   id          String    @id @default(uuid())
