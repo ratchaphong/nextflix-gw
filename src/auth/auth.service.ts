@@ -21,6 +21,7 @@ import {
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { LoginLogService } from 'src/login-log/login-log.service';
 import { InviteDto } from './dto/invite.dto';
+import { CheckEmailQuery } from './dto/check-email.query';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +31,29 @@ export class AuthService {
     private subscriptionService: SubscriptionService,
     private loginLogService: LoginLogService,
   ) {}
+
+  // async checkEmail(dto: CheckEmailQuery) {
+  //   try {
+  //     await this.prisma.user.findUniqueOrThrow({
+  //       where: { email: dto.email },
+  //     });
+
+  //     return { exists: true };
+  //   } catch {
+  //     throw new NotFoundException('Email not found');
+  //   }
+  // }
+  async checkEmail(dto: CheckEmailQuery) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (user) {
+      throw new ConflictException('Email already exists');
+    }
+
+    return { isAvailable: true };
+  }
 
   async register(dto: RegisterDto) {
     const exists = await this.prisma.user.findUnique({

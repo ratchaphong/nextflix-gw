@@ -11,6 +11,7 @@ import {
   Delete,
   Param,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -36,11 +37,38 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InviteDto } from './dto/invite.dto';
 import { RenewSubscriptionDto } from './dto/renew-subscription.dto';
 import { RenewSubscriptionResponseDto } from './dto/renew-subscription-response.dto';
+import { CheckEmailResponseDto } from './dto/check-email.response';
+import { CheckEmailQuery } from './dto/check-email.query';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Get('check-email')
+  @ApiOperation({
+    summary: 'Check if email is already used',
+    description: 'Returns true if the email exists, false otherwise.',
+  })
+  @ApiOkResponse({
+    type: CheckEmailResponseDto,
+  })
+  @ApiConflictResponse({
+    description: 'Email already exists',
+    schema: {
+      example: {
+        statusCode: 409,
+        message: 'Email already exists',
+        error: 'Conflict',
+      },
+    },
+  })
+  async checkEmail(
+    @Query() query: CheckEmailQuery,
+  ): Promise<CheckEmailResponseDto> {
+    const result = await this.authService.checkEmail(query);
+    return plainToInstance(CheckEmailResponseDto, result);
+  }
 
   @Post('register')
   @HttpCode(201)
