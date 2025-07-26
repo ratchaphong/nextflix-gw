@@ -114,7 +114,7 @@ export class LoginLogController {
       excludeExtraneousValues: true,
     });
     const buffer = await this.pdfService.generateLoginLogPdf({
-      logs: logs.slice(0, 100),
+      logs,
     });
 
     res.set({

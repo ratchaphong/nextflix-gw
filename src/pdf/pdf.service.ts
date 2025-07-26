@@ -22,11 +22,38 @@ export class PdfService {
     });
   }
 
+  // async generateLoginLogPdf(data: {
+  //   logs: LoginLogResponseDto[];
+  // }): Promise<Buffer> {
+  //   const templatePath = `${process.cwd()}/src/pdf/templates/login-log.hbs`;
+  //   const html = this.compileTemplate(templatePath, {
+  //     ...data,
+  //     generatedAt: new Date(),
+  //   });
+
+  //   const browser = await puppeteer.launch({
+  //     headless: true,
+  //     args: [],
+  //   });
+  //   const page = await browser.newPage();
+  //   await page.setContent(html, { waitUntil: 'domcontentloaded' });
+
+  //   const pdfBuffer = await page.pdf({ format: 'A4' });
+  //   await browser.close();
+
+  //   return Buffer.from(pdfBuffer);
+  // }
+
+  // private compileTemplate(templatePath: string, data: any): string {
+  //   const raw = fs.readFileSync(templatePath, 'utf8');
+  //   const template = Handlebars.compile(raw);
+  //   return template(data);
+  // }
+
   async generateLoginLogPdf(data: {
     logs: LoginLogResponseDto[];
   }): Promise<Buffer> {
-    const templatePath = `${process.cwd()}/src/pdf/templates/login-log.hbs`;
-    const html = this.compileTemplate(templatePath, {
+    const html = this.compileLoginLogTemplate({
       ...data,
       generatedAt: new Date(),
     });
@@ -36,13 +63,11 @@ export class PdfService {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage', // ลดการใช้ shared memory
-        '--disable-accelerated-2d-canvas', // ปิด GPU canvas
-        '--disable-gpu', // ปิด GPU
-        '--single-process', // ลด thread
-        '--no-zygote', // ปิด prelaunch process
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
       ],
     });
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
@@ -52,9 +77,51 @@ export class PdfService {
     return Buffer.from(pdfBuffer);
   }
 
-  private compileTemplate(templatePath: string, data: any): string {
-    const raw = fs.readFileSync(templatePath, 'utf8');
+  private compileLoginLogTemplate(data: any): string {
+    const raw = LOGIN_LOG_TEMPLATE;
     const template = Handlebars.compile(raw);
     return template(data);
   }
 }
+
+export const LOGIN_LOG_TEMPLATE = `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial; }
+            h2 { text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h2>📋 Login Report (Daily)</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Login Time</th>
+                <th>Logout Time</th>
+                <th>IP Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each logs}}
+                <tr>
+                  <td>{{inc @index}}</td>
+                  <td>{{this.user.name}}</td>
+                  <td>{{formatDate this.loginAt}}</td>
+                  <td>{{formatDate this.logoutAt}}</td>
+                  <td>{{this.ipAddress}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+          <div style="margin-top: 20px; font-size: 0.85rem;">
+            Generated at: {{formatDate generatedAt}}
+          </div>
+        </body>
+      </html>
+    `;
