@@ -113,7 +113,9 @@ export class LoginLogController {
     const logs = plainToInstance(LoginLogResponseDto, result, {
       excludeExtraneousValues: true,
     });
-    const buffer = await this.pdfService.generateLoginLogPdf({ logs });
+    const buffer = await this.pdfService.generateLoginLogPdf({
+      logs: logs.slice(0, 100),
+    });
 
     res.set({
       'Content-Type': 'application/pdf',
