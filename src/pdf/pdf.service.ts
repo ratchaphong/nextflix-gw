@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
-import * as puppeteer from 'puppeteer';
 import { LoginLogResponseDto } from 'src/login-log/dto/login-log-response.dto';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import * as html_to_pdf from 'html-pdf-node';
 
 @Injectable()
 export class PdfService {
@@ -26,7 +26,7 @@ export class PdfService {
   //   logs: LoginLogResponseDto[];
   // }): Promise<Buffer> {
   //   const templatePath = `${process.cwd()}/src/pdf/templates/login-log.hbs`;
-  //   const html = this.compileTemplate(templatePath, {
+  //   const html = this.compileLoginLogTemplate(templatePath, {
   //     ...data,
   //     generatedAt: new Date(),
   //   });
@@ -44,7 +44,7 @@ export class PdfService {
   //   return Buffer.from(pdfBuffer);
   // }
 
-  // private compileTemplate(templatePath: string, data: any): string {
+  // private compileLoginLogTemplate(templatePath: string, data: any): string {
   //   const raw = fs.readFileSync(templatePath, 'utf8');
   //   const template = Handlebars.compile(raw);
   //   return template(data);
@@ -53,77 +53,27 @@ export class PdfService {
   async generateLoginLogPdf(data: {
     logs: LoginLogResponseDto[];
   }): Promise<Buffer> {
-    const html = this.compileLoginLogTemplate({
-      ...data,
-      generatedAt: new Date(),
-    });
+    const html = this.compileLoginLogTemplate(data);
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-      ],
-    });
+    const file = { content: html };
+    const options = { format: 'A4' };
 
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+    const pdfBuffer = await html_to_pdf.generatePdf(file, options);
 
-    const pdfBuffer = await page.pdf({ format: 'A4' });
-    await browser.close();
-
-    return Buffer.from(pdfBuffer);
+    return pdfBuffer;
   }
 
   private compileLoginLogTemplate(data: {
     logs: LoginLogResponseDto[];
-    generatedAt: Date;
   }): string {
-    const template = Handlebars.compile(LOGIN_LOG_TEMPLATE);
-    return template(data);
+    const templateSource = fs.readFileSync(
+      `${process.cwd()}/src/pdf/templates/login-log.hbs`,
+      'utf8',
+    );
+    const template = Handlebars.compile(templateSource);
+    return template({
+      ...data,
+      generatedAt: new Date(),
+    });
   }
 }
-
-export const LOGIN_LOG_TEMPLATE = `
-  <html>
-    <head>
-      <style>
-        body { font-family: Arial; }
-        h2 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-      </style>
-    </head>
-    <body>
-      <h2>📋 Login Report (Daily)</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>User</th>
-            <th>Login Time</th>
-            <th>Logout Time</th>
-            <th>IP Address</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each logs}}
-            <tr>
-              <td>{{inc @index}}</td>
-              <td>{{this.user.name}}</td>
-              <td>{{formatDate this.loginAt}}</td>
-              <td>{{formatDate this.logoutAt}}</td>
-              <td>{{this.ipAddress}}</td>
-            </tr>
-          {{/each}}
-        </tbody>
-      </table>
-      <div style="margin-top: 20px; font-size: 0.85rem;">
-        Generated at: {{formatDate generatedAt}}
-      </div>
-    </body>
-  </html>
-`;
