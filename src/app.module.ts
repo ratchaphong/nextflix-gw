@@ -10,11 +10,23 @@ import { CronService } from './cron/cron.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoginLogModule } from './login-log/login-log.module';
+import { CacheService } from './cache/cache.service';
+import { CACHE_TTL_SECONDS } from './utils/auth.utils';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: redisStore,
+        host: process.env.REDIS_HOST,
+        ttl: CACHE_TTL_SECONDS,
+      }),
     }),
     ScheduleModule.forRoot(),
     AuthModule,
@@ -24,7 +36,7 @@ import { LoginLogModule } from './login-log/login-log.module';
     PrismaModule,
     LoginLogModule,
   ],
-  providers: [CronService],
+  providers: [CronService, CacheService],
   // controllers: [AppController],
   // providers: [AppService],
 })

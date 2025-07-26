@@ -15,6 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '@prisma/client';
 import { JwtPayload } from '../jwt/jwt-payload';
 import {
+  CACHE_TTL_SECONDS,
   NEAR_EXPIRY_THRESHOLD_SECONDS,
   THIRTY_DAYS,
 } from '../utils/auth.utils';
@@ -22,6 +23,7 @@ import { SubscriptionService } from 'src/subscription/subscription.service';
 import { LoginLogService } from 'src/login-log/login-log.service';
 import { InviteDto } from './dto/invite.dto';
 import { CheckEmailQuery } from './dto/check-email.query';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +32,7 @@ export class AuthService {
     private jwtService: JwtService,
     private subscriptionService: SubscriptionService,
     private loginLogService: LoginLogService,
+    private readonly cacheService: CacheService,
   ) {}
 
   // async checkEmail(dto: CheckEmailQuery) {
@@ -128,6 +131,21 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
+    const cacheKey = `profile:${userId}`;
+
+    const cached = await this.cacheService.get(cacheKey);
+    console.log(`[getProfile] CacheKey: ${cacheKey}, Found: ${!!cached}`);
+
+    if (cached) {
+      console.log(`[getProfile] 🔄 Returned from cache`);
+      // console.log(
+      //   '[getProfile] Cached Value:',
+      //   JSON.stringify(cached, null, 2),
+      // );
+
+      return cached;
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -148,11 +166,17 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {
+      console.warn(`[getProfile] ❌ User not found`);
+      throw new NotFoundException('User not found');
+    }
 
     // ✅ หา household จาก OWNER หรือ MEMBER
     const household = user.household ?? user.member?.household;
-    if (!household) throw new NotFoundException('Household not found');
+    if (!household) {
+      console.warn(`[getProfile] ❌ Household not found`);
+      throw new NotFoundException('Household not found');
+    }
 
     // ✅ หา package จาก OWNER (กรณี MEMBER จะเป็นของ user เจ้าของ household)
     const subscriptionPackage =
@@ -174,21 +198,31 @@ export class AuthService {
       },
     });
 
-    return {
+    const result = {
       ...user,
       household,
       package: subscriptionPackage,
       profiles,
     };
+
+    await this.cacheService.set(cacheKey, result, CACHE_TTL_SECONDS);
+    console.log(
+      `[getProfile] ✅ Set cache for profile:${userId} for ${CACHE_TTL_SECONDS} seconds`,
+    );
+
+    return result;
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
-    await this.getProfile(userId);
-
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: dto,
     });
+
+    await this.cacheService.del(`profile:${userId}`);
+    console.log(`[updateUser] 🧹 Deleted cache: profile:${userId}`);
+
+    return updatedUser;
   }
 
   async deleteUser(id: string): Promise<void> {

@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from '../jwt/jwt.strategy';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
 import { LoginLogModule } from 'src/login-log/login-log.module';
+import { CacheService } from 'src/cache/cache.service';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { LoginLogModule } from 'src/login-log/login-log.module';
     LoginLogModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, CacheService],
   exports: [JwtModule],
 })
 export class AuthModule {}
