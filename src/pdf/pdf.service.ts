@@ -77,51 +77,53 @@ export class PdfService {
     return Buffer.from(pdfBuffer);
   }
 
-  private compileLoginLogTemplate(data: any): string {
-    const raw = LOGIN_LOG_TEMPLATE;
-    const template = Handlebars.compile(raw);
+  private compileLoginLogTemplate(data: {
+    logs: LoginLogResponseDto[];
+    generatedAt: Date;
+  }): string {
+    const template = Handlebars.compile(LOGIN_LOG_TEMPLATE);
     return template(data);
   }
 }
 
 export const LOGIN_LOG_TEMPLATE = `
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial; }
-            h2 { text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h2>📋 Login Report (Daily)</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>User</th>
-                <th>Login Time</th>
-                <th>Logout Time</th>
-                <th>IP Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each logs}}
-                <tr>
-                  <td>{{inc @index}}</td>
-                  <td>{{this.user.name}}</td>
-                  <td>{{formatDate this.loginAt}}</td>
-                  <td>{{formatDate this.logoutAt}}</td>
-                  <td>{{this.ipAddress}}</td>
-                </tr>
-              {{/each}}
-            </tbody>
-          </table>
-          <div style="margin-top: 20px; font-size: 0.85rem;">
-            Generated at: {{formatDate generatedAt}}
-          </div>
-        </body>
-      </html>
-    `;
+  <html>
+    <head>
+      <style>
+        body { font-family: Arial; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+      </style>
+    </head>
+    <body>
+      <h2>📋 Login Report (Daily)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Login Time</th>
+            <th>Logout Time</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each logs}}
+            <tr>
+              <td>{{inc @index}}</td>
+              <td>{{this.user.name}}</td>
+              <td>{{formatDate this.loginAt}}</td>
+              <td>{{formatDate this.logoutAt}}</td>
+              <td>{{this.ipAddress}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      <div style="margin-top: 20px; font-size: 0.85rem;">
+        Generated at: {{formatDate generatedAt}}
+      </div>
+    </body>
+  </html>
+`;
