@@ -33,7 +33,15 @@ export class PdfService {
 
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage', // ลดการใช้ shared memory
+        '--disable-accelerated-2d-canvas', // ปิด GPU canvas
+        '--disable-gpu', // ปิด GPU
+        '--single-process', // ลด thread
+        '--no-zygote', // ปิด prelaunch process
+      ],
     });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
