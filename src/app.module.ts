@@ -13,6 +13,7 @@ import { LoginLogModule } from './login-log/login-log.module';
 import { CacheService } from './cache/cache.service';
 import { CACHE_TTL_SECONDS } from './utils/auth.utils';
 import { CacheModule } from '@nestjs/cache-manager';
+import { PdfModule } from './pdf/pdf.module';
 import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
@@ -35,6 +36,7 @@ import * as redisStore from 'cache-manager-redis-store';
     SubscriptionModule,
     PrismaModule,
     LoginLogModule,
+    PdfModule,
   ],
   providers: [CronService, CacheService],
   // controllers: [AppController],

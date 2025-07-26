@@ -207,7 +207,7 @@ export class AuthService {
 
     await this.cacheService.set(cacheKey, result, CACHE_TTL_SECONDS);
     console.log(
-      `[getProfile] ✅ Set cache for profile:${userId} for ${CACHE_TTL_SECONDS} seconds`,
+      `[getProfile] ✅ Set cache for profile:${userId} for ${CACHE_TTL_SECONDS / 1000} seconds`,
     );
 
     return result;

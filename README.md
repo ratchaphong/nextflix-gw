@@ -19,6 +19,7 @@
 - ✅ ดึงภาพยนตร์ตามหมวดหมู่
 - ✅ ดึงรายการวิดีโอแนะนำ
 - ✅ Swagger พร้อม Bearer Token และจำ token ได้หลัง refresh
+- ✅ แคชข้อมูลโปรไฟล์ด้วย Redis เพื่อลดโหลด database
 
 ## ⚙️ การติดตั้ง
 
@@ -61,6 +62,7 @@ This project is composed of the following services:
 - ✅ List videos by category
 - ✅ Show recommended videos
 - ✅ Swagger UI with Bearer Token support and persistence on refresh
+- ✅ Profile caching with Redis to reduce DB load
 
 ## 🧰 Tech Stack
 
@@ -69,6 +71,7 @@ This project is composed of the following services:
 - **Prisma ORM**
 - **Swagger**
 - **OMDB API** integration
+- **Redis** (via Upstash)
 
 ## ⚙️ Installation
 

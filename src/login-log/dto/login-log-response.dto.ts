@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 export class LoginLogResponseDto {
   @Expose()
@@ -21,4 +21,14 @@ export class LoginLogResponseDto {
   @Expose()
   @ApiProperty({ example: '2025-07-20T12:34:56.789Z' })
   createdAt: Date;
+
+  @Expose()
+  @Transform(({ obj }) => obj.user?.email)
+  @ApiProperty({ example: 'user@example.com', nullable: true })
+  userEmail?: string;
+
+  @Expose()
+  @Transform(({ obj }) => obj.user?.name)
+  @ApiProperty({ example: 'John Doe', nullable: true })
+  userName?: string;
 }

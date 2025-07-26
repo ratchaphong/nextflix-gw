@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        thead {
+            background-color: #f0f0f0;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Daily Login Report</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>IP Address</th>
+                <th>User Agent</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each logs}}
+            <tr>
+                <td>{{inc @index}}</td>
+                <td>{{#if userName}}{{userName}}{{else}}-{{/if}}</td>
+                <td>{{#if userEmail}}{{userEmail}}{{else}}-{{/if}}</td>
+                <td>{{#if ipAddress}}{{ipAddress}}{{else}}-{{/if}}</td>
+                <td>{{#if userAgent}}{{userAgent}}{{else}}-{{/if}}</td>
+                <td>{{formatDate createdAt}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Generated on {{formatDate generatedAt}}
+    </div>
+</body>
+
+</html>
