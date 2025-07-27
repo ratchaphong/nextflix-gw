@@ -11,8 +11,8 @@ import { LoginLogModule } from './login-log/login-log.module';
 import { CACHE_TTL_SECONDS } from './utils/auth.utils';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { MailService } from './mail/mail.service';
+// import { MailerModule } from '@nestjs-modules/mailer';
+// import { MailService } from './mail/mail.service';
 
 @Module({
   imports: [
@@ -29,23 +29,23 @@ import { MailService } from './mail/mail.service';
         ttl: config.get<number>('CACHE_TTL_SECONDS') || CACHE_TTL_SECONDS,
       }),
     }),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        transport: {
-          host: config.get<string>('SMTP_HOST'),
-          port: config.get<number>('SMTP_PORT'),
-          auth: {
-            user: config.get<string>('SMTP_USER'),
-            pass: config.get<string>('SMTP_PASS'),
-          },
-        },
-        defaults: {
-          from: config.get<string>('MAIL_FROM'),
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    // MailerModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   useFactory: async (config: ConfigService) => ({
+    //     transport: {
+    //       host: config.get<string>('SMTP_HOST'),
+    //       port: config.get<number>('SMTP_PORT'),
+    //       auth: {
+    //         user: config.get<string>('SMTP_USER'),
+    //         pass: config.get<string>('SMTP_PASS'),
+    //       },
+    //     },
+    //     defaults: {
+    //       from: config.get<string>('MAIL_FROM'),
+    //     },
+    //   }),
+    //   inject: [ConfigService],
+    // }),
     ScheduleModule.forRoot(),
     AuthModule,
     MovieModule,
@@ -54,6 +54,9 @@ import { MailService } from './mail/mail.service';
     PrismaModule,
     LoginLogModule,
   ],
-  providers: [CronService, MailService],
+  providers: [
+    CronService,
+    // MailService
+  ],
 })
 export class AppModule {}
