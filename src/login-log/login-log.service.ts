@@ -162,7 +162,7 @@ export class LoginLogService {
     fs.writeFileSync(pdfPath, pdfBuffer);
 
     if (isSwagger) {
-      this.sendLoginLogReport();
+      await this.sendLoginLogReport();
       return oldLogs.length;
     } else {
       const deletedOldLoginLogs = await this.prisma.loginLog.deleteMany({
@@ -194,7 +194,7 @@ export class LoginLogService {
       return;
     }
 
-    const pdfBuffer = fs.readFileSync(pdfPath);
+    // const pdfBuffer = fs.readFileSync(pdfPath);
     const jsonRaw = fs.readFileSync(jsonPath, 'utf-8');
     const jsonObject = JSON.parse(jsonRaw);
     const jsonText = jsonObject
