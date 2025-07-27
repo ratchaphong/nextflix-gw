@@ -144,9 +144,9 @@ export class LoginLogService {
       return 0;
     }
 
-    const pdfBuffer = await this.pdfService.generateLoginLogPdf({
-      logs: plainToInstance(LoginLogResponseDto, oldLogs),
-    });
+    // const pdfBuffer = await this.pdfService.generateLoginLogPdf({
+    //   logs: plainToInstance(LoginLogResponseDto, oldLogs),
+    // });
 
     const archiveDir = path.join(process.cwd(), 'archive');
     if (!fs.existsSync(archiveDir)) {
@@ -158,8 +158,8 @@ export class LoginLogService {
     const jsonPath = path.join(archiveDir, `login-log-${dateStr}.json`);
     fs.writeFileSync(jsonPath, JSON.stringify(oldLogs, null, 2), 'utf-8');
 
-    const pdfPath = path.join(archiveDir, `login-log-${dateStr}.pdf`);
-    fs.writeFileSync(pdfPath, pdfBuffer);
+    // const pdfPath = path.join(archiveDir, `login-log-${dateStr}.pdf`);
+    // fs.writeFileSync(pdfPath, pdfBuffer);
 
     if (isSwagger) {
       await this.sendLoginLogReport();
@@ -174,10 +174,6 @@ export class LoginLogService {
         },
       });
 
-      console.log(
-        `🧹 Deleted ${deletedOldLoginLogs.count} login logs from last month.`,
-      );
-
       return deletedOldLoginLogs.count;
     }
   }
@@ -185,16 +181,18 @@ export class LoginLogService {
   async sendLoginLogReport() {
     const archiveDir = path.join(process.cwd(), 'archive');
     const today = new Date().toISOString().split('T')[0]; // เช่น 2025-08-01
-    const pdfPath = path.join(archiveDir, `login-log-${today}.pdf`);
+    // const pdfPath = path.join(archiveDir, `login-log-${today}.pdf`);
     const jsonPath = path.join(archiveDir, `login-log-${today}.json`);
-    const pdfExists = fs.existsSync(pdfPath);
+    // const pdfExists = fs.existsSync(pdfPath);
     const jsonExists = fs.existsSync(jsonPath);
-    if (!pdfExists || !jsonExists) {
+    if (
+      // !pdfExists ||
+      !jsonExists
+    ) {
       console.warn('❌ Missing archived files for email.');
       return;
     }
 
-    // const pdfBuffer = fs.readFileSync(pdfPath);
     const jsonRaw = fs.readFileSync(jsonPath, 'utf-8');
     const jsonObject = JSON.parse(jsonRaw);
     const jsonText = jsonObject
@@ -205,13 +203,13 @@ export class LoginLogService {
 
     try {
       await this.mailService.sendLoginLogReport(
-        pdfPath,
+        // pdfPath,
         jsonText,
         '📋 Login Log Cleanup Report (Last Month)',
         'Please find attached the login log archive for last month, in both PDF and JSON formats.',
       );
       console.log('📧 Email sent successfully.');
-      fs.unlinkSync(pdfPath);
+      // fs.unlinkSync(pdfPath);
       fs.unlinkSync(jsonPath);
       console.log('🧹 Archived files deleted.');
     } catch (err) {

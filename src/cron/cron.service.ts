@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { LoginLogService } from 'src/login-log/login-log.service';
-// import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { THIRTY_DAYS_IN_MS } from 'src/utils/cron.utils';
 
@@ -12,7 +11,6 @@ export class CronService {
   constructor(
     private prisma: PrismaService,
     private loginLogService: LoginLogService,
-    // private mailService: MailService,
   ) {
     this.logger.log('✅ CronService initialized');
   }

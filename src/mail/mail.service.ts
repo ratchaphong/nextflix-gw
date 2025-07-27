@@ -3,8 +3,6 @@ import { Injectable } from '@nestjs/common';
 // import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { SMTPClient } from 'emailjs';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class MailService {
@@ -51,8 +49,9 @@ export class MailService {
   //     ],
   //   });
   // }
+
   async sendLoginLogReport(
-    pdfPath: string,
+    // pdfPath: string,
     jsonText: string,
     subject = '📋 Login Log Cleanup Report (Last Month)',
     text = 'Please find attached the login log archive for last month, in both PDF and JSON formats.',
@@ -76,11 +75,11 @@ export class MailService {
       to: recipient,
       subject,
       attachment: [
-        {
-          path: pdfPath,
-          name: `login-log-${today}.pdf`,
-          type: 'application/pdf',
-        },
+        // {
+        //   path: pdfPath,
+        //   name: `login-log-${today}.pdf`,
+        //   type: 'application/pdf',
+        // },
         {
           data: jsonText,
           name: `login-log-${today}.txt`,
