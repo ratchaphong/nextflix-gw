@@ -20,6 +20,7 @@
 - ✅ ดึงรายการวิดีโอแนะนำ
 - ✅ Swagger พร้อม Bearer Token และจำ token ได้หลัง refresh
 - ✅ แคชข้อมูลโปรไฟล์ด้วย Redis เพื่อลดโหลด database
+- ✅ ระบบมีฟีเจอร์ส่งอีเมลแนบไฟล์ PDF และ TXT รายงานการล้าง log การเข้าใช้งานของผู้ใช้ในเดือนก่อนหน้า
 
 ## ⚙️ การติดตั้ง
 
@@ -63,6 +64,7 @@ This project is composed of the following services:
 - ✅ Show recommended videos
 - ✅ Swagger UI with Bearer Token support and persistence on refresh
 - ✅ Profile caching with Redis to reduce DB load
+- ✅ This system supports sending monthly login log reports via email, including attached .pdf and .txt files.
 
 ## 🧰 Tech Stack
 
