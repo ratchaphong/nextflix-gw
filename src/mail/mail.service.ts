@@ -2,29 +2,44 @@
 import { Injectable } from '@nestjs/common';
 // import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { SMTPClient } from 'emailjs';
+// import { SMTPClient } from 'emailjs';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
-  private client: SMTPClient | null = null; // <-- Lazy instance
+  // private client: SMTPClient | null = null;
+  private transporter: nodemailer.Transporter | null = null;
 
   constructor(
     // private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
   ) {}
-
-  private getClient(): SMTPClient {
-    if (!this.client) {
-      this.client = new SMTPClient({
-        user: this.configService.get<string>('SMTP_USER'),
-        password: this.configService.get<string>('SMTP_PASS'),
-        host: this.configService.get<string>('SMTP_HOST'),
+  private getTransporter(): nodemailer.Transporter {
+    if (!this.transporter) {
+      this.transporter = nodemailer.createTransport({
+        host: this.configService.get('SMTP_HOST'),
         port: this.configService.get<number>('SMTP_PORT'),
-        tls: true,
+        secure: false,
+        auth: {
+          user: this.configService.get('SMTP_USER'),
+          pass: this.configService.get('SMTP_PASS'),
+        },
       });
     }
-    return this.client;
+    return this.transporter;
   }
+  // private getClient(): SMTPClient {
+  //   if (!this.client) {
+  //     this.client = new SMTPClient({
+  //       user: this.configService.get<string>('SMTP_USER'),
+  //       password: this.configService.get<string>('SMTP_PASS'),
+  //       host: this.configService.get<string>('SMTP_HOST'),
+  //       port: this.configService.get<number>('SMTP_PORT'),
+  //       tls: true,
+  //     });
+  //   }
+  //   return this.client;
+  // }
 
   // async sendLoginLogReport(
   //   pdfBuffer: Buffer,
@@ -74,26 +89,46 @@ export class MailService {
       );
     }
 
+    // const message = {
+    //   text,
+    //   from: sender,
+    //   to: recipient,
+    //   subject,
+    //   attachment: [
+    //     {
+    //       path: pdfPath,
+    //       name: `login-log-${today}.pdf`,
+    //       type: 'application/pdf',
+    //     },
+    //     {
+    //       data: jsonText,
+    //       name: `login-log-${today}.txt`,
+    //       type: 'text/plain',
+    //       encoding: 'utf-8',
+    //     },
+    //   ],
+    // };
+
+    // await this.getClient().sendAsync(message);
     const message = {
       text,
       from: sender,
       to: recipient,
       subject,
-      attachment: [
+      attachments: [
         {
           path: pdfPath,
-          name: `login-log-${today}.pdf`,
-          type: 'application/pdf',
+          filename: `login-log-${today}.pdf`,
+          contentType: 'application/pdf',
         },
         {
-          data: jsonText,
-          name: `login-log-${today}.txt`,
-          type: 'text/plain',
-          encoding: 'utf-8',
+          content: jsonText,
+          filename: `login-log-${today}.txt`,
+          contentType: 'text/plain',
         },
       ],
     };
 
-    await this.getClient().sendAsync(message);
+    await this.getTransporter().sendMail(message);
   }
 }
