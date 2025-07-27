@@ -205,7 +205,7 @@ export class LoginLogService {
 
     try {
       await this.mailService.sendLoginLogReport(
-        pdfBuffer,
+        pdfPath,
         jsonText,
         '📋 Login Log Cleanup Report (Last Month)',
         'Please find attached the login log archive for last month, in both PDF and JSON formats.',

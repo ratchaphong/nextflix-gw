@@ -52,7 +52,7 @@ export class MailService {
   //   });
   // }
   async sendLoginLogReport(
-    pdfBuffer: Buffer,
+    pdfPath: string,
     jsonText: string,
     subject = '📋 Login Log Cleanup Report (Last Month)',
     text = 'Please find attached the login log archive for last month, in both PDF and JSON formats.',
@@ -69,8 +69,6 @@ export class MailService {
         'MAIL_FROM or MAIL_TO is missing in environment variables',
       );
     }
-    const tempPath = path.join(__dirname, `login-log-${today}.pdf`);
-    fs.writeFileSync(tempPath, pdfBuffer); // ✅ เขียน PDF buffer ลงไฟล์
 
     const message = {
       text,
@@ -79,7 +77,7 @@ export class MailService {
       subject,
       attachment: [
         {
-          path: tempPath,
+          path: pdfPath,
           name: `login-log-${today}.pdf`,
           type: 'application/pdf',
         },
@@ -93,8 +91,5 @@ export class MailService {
     };
 
     await this.client.sendAsync(message);
-
-    // ✅ ลบไฟล์หลังส่งเสร็จ
-    fs.unlinkSync(tempPath);
   }
 }
