@@ -102,7 +102,7 @@ export class LoginLogController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Get('report/daily/pdf')
+  @Get('report/daily')
   @ApiOperation({ summary: 'Download daily login report as PDF' })
   @ApiOkResponse({
     description: 'PDF file containing daily login logs',
@@ -122,5 +122,37 @@ export class LoginLogController {
       'Content-Disposition': 'attachment; filename="login-log.pdf"',
     });
     res.end(buffer);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  @Get('report/daily/html')
+  @ApiOperation({ summary: 'View daily login report as HTML' })
+  @ApiOkResponse({
+    description: 'Raw HTML preview of daily login logs',
+    content: { 'text/html': {} },
+  })
+  async previewHtml(@Res() res: Response) {
+    // const result = await this.service.findAllDailyLogs();
+    const mockup: LoginLogResponseDto = {
+      id: '',
+      userId: '',
+      createdAt: new Date(),
+    };
+    const logs: LoginLogResponseDto[] = [mockup];
+    const html = this.pdfService.getLoginLogHtml(logs);
+
+    res.set('Content-Type', 'text/html');
+    res.send(html);
+  }
+
+  @Get('test-clear')
+  @ApiOperation({
+    summary: '🔧 Test clear old login logs manually (admin only)',
+  })
+  @ApiOkResponse({ description: 'Number of deleted logs' })
+  async testClearLogs(): Promise<number> {
+    const deleted = await this.service.clearOldLogsAndArchive();
+    return deleted;
   }
 }

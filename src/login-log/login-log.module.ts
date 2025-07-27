@@ -3,10 +3,11 @@ import { LoginLogService } from './login-log.service';
 import { LoginLogController } from './login-log.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PdfModule } from 'src/pdf/pdf.module';
+import { MailService } from 'src/mail/mail.service';
 
 @Module({
   imports: [PrismaModule, PdfModule],
-  providers: [LoginLogService],
+  providers: [LoginLogService, MailService],
   controllers: [LoginLogController],
   exports: [LoginLogService],
 })

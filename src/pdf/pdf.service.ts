@@ -63,6 +63,18 @@ export class PdfService {
     return pdfBuffer;
   }
 
+  public getLoginLogHtml(logs: LoginLogResponseDto[]): string {
+    const templateSource = fs.readFileSync(
+      `${process.cwd()}/src/pdf/templates/login-log.hbs`,
+      'utf8',
+    );
+    const template = Handlebars.compile(templateSource);
+    return template({
+      logs,
+      generatedAt: new Date(),
+    });
+  }
+
   private compileLoginLogTemplate(data: {
     logs: LoginLogResponseDto[];
   }): string {

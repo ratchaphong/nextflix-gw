@@ -1,5 +1,8 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { LoginLogService } from 'src/login-log/login-log.service';
+import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { THIRTY_DAYS_IN_MS } from 'src/utils/cron.utils';
 
@@ -7,7 +10,11 @@ import { THIRTY_DAYS_IN_MS } from 'src/utils/cron.utils';
 export class CronService {
   private readonly logger = new Logger(CronService.name);
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private loginLogService: LoginLogService,
+    private mailService: MailService,
+  ) {
     this.logger.log('✅ CronService initialized');
   }
 
@@ -49,13 +56,11 @@ export class CronService {
   async clearOldLoginLogs() {
     this.logger.log('🧹 Running clead old logs cleanup...');
 
-    const cutoff = new Date(Date.now() - THIRTY_DAYS_IN_MS);
-    const deletedOldLoginLogs = await this.prisma.loginLog.deleteMany({
-      where: { createdAt: { lt: cutoff } },
-    });
-    this.logger.log(
-      `🧹 Deleted ${deletedOldLoginLogs.count} login logs older than 30 days.`,
-    );
+    const deletedLogs =
+      await this.loginLogService.clearOldLogsAndArchive(false);
+    await this.loginLogService.sendLoginLogReport();
+
+    this.logger.log(`🧹 Deleted ${deletedLogs} login logs from last month.`);
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
