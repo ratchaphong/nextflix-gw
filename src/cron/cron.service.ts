@@ -10,7 +10,7 @@ export class CronService {
 
   constructor(
     private prisma: PrismaService,
-    private loginLogService: LoginLogService,
+    // private loginLogService: LoginLogService,
   ) {
     this.logger.log('✅ CronService initialized');
   }

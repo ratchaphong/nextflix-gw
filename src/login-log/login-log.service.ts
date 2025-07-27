@@ -9,19 +9,19 @@ import {
   subMonths,
   addMonths,
 } from 'date-fns';
-import { plainToInstance } from 'class-transformer';
-import { LoginLogResponseDto } from './dto/login-log-response.dto';
-import { PdfService } from 'src/pdf/pdf.service';
-import * as fs from 'fs';
-import * as path from 'path';
-import { MailService } from 'src/mail/mail.service';
+// import { plainToInstance } from 'class-transformer';
+// import { LoginLogResponseDto } from './dto/login-log-response.dto';
+// import { PdfService } from 'src/pdf/pdf.service';
+// import * as fs from 'fs';
+// import * as path from 'path';
+// import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class LoginLogService {
   constructor(
     private prisma: PrismaService,
-    private pdfService: PdfService,
-    private mailService: MailService,
+    // private pdfService: PdfService,
+    // private mailService: MailService,
   ) {}
 
   create(data: CreateLoginLogDto, userId: string) {
@@ -122,61 +122,61 @@ export class LoginLogService {
     });
   }
 
-  // async clearOldLogsAndArchive(isSwagger = true) {
-  //   const firstDayOfCurrentMonth = isSwagger
-  //     ? startOfMonth(addMonths(new Date(), 1))
-  //     : startOfMonth(new Date());
-  //   const firstDayOfLastMonth = subMonths(firstDayOfCurrentMonth, 1);
+  async clearOldLogsAndArchive(isSwagger = true) {
+    const firstDayOfCurrentMonth = isSwagger
+      ? startOfMonth(addMonths(new Date(), 1))
+      : startOfMonth(new Date());
+    const firstDayOfLastMonth = subMonths(firstDayOfCurrentMonth, 1);
 
-  //   const oldLogs = await this.prisma.loginLog.findMany({
-  //     where: {
-  //       createdAt: {
-  //         gte: firstDayOfLastMonth,
-  //         lt: firstDayOfCurrentMonth,
-  //       },
-  //     },
-  //     orderBy: { createdAt: 'asc' },
-  //     include: { user: true },
-  //   });
+    const oldLogs = await this.prisma.loginLog.findMany({
+      where: {
+        createdAt: {
+          gte: firstDayOfLastMonth,
+          lt: firstDayOfCurrentMonth,
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+      include: { user: true },
+    });
 
-  //   if (oldLogs.length === 0) {
-  //     console.log('✅ No old logs found to archive.');
-  //     return 0;
-  //   }
+    if (oldLogs.length === 0) {
+      console.log('✅ No old logs found to archive.');
+      return 0;
+    }
 
-  //   const pdfBuffer = await this.pdfService.generateLoginLogPdf({
-  //     logs: plainToInstance(LoginLogResponseDto, oldLogs),
-  //   });
+    // const pdfBuffer = await this.pdfService.generateLoginLogPdf({
+    //   logs: plainToInstance(LoginLogResponseDto, oldLogs),
+    // });
 
-  //   const archiveDir = path.join(process.cwd(), 'archive');
-  //   if (!fs.existsSync(archiveDir)) {
-  //     fs.mkdirSync(archiveDir);
-  //   }
+    // const archiveDir = path.join(process.cwd(), 'archive');
+    // if (!fs.existsSync(archiveDir)) {
+    //   fs.mkdirSync(archiveDir);
+    // }
 
-  //   const dateStr = new Date().toISOString().split('T')[0];
+    // const dateStr = new Date().toISOString().split('T')[0];
 
-  //   const jsonPath = path.join(archiveDir, `login-log-${dateStr}.json`);
-  //   fs.writeFileSync(jsonPath, JSON.stringify(oldLogs, null, 2), 'utf-8');
+    // const jsonPath = path.join(archiveDir, `login-log-${dateStr}.json`);
+    // fs.writeFileSync(jsonPath, JSON.stringify(oldLogs, null, 2), 'utf-8');
 
-  //   const pdfPath = path.join(archiveDir, `login-log-${dateStr}.pdf`);
-  //   fs.writeFileSync(pdfPath, pdfBuffer);
+    // const pdfPath = path.join(archiveDir, `login-log-${dateStr}.pdf`);
+    // fs.writeFileSync(pdfPath, pdfBuffer);
 
-  //   if (isSwagger) {
-  //     await this.sendLoginLogReport();
-  //     return oldLogs.length;
-  //   } else {
-  //     const deletedOldLoginLogs = await this.prisma.loginLog.deleteMany({
-  //       where: {
-  //         createdAt: {
-  //           gte: firstDayOfLastMonth,
-  //           lt: firstDayOfCurrentMonth,
-  //         },
-  //       },
-  //     });
+    if (isSwagger) {
+      // await this.sendLoginLogReport();
+      return oldLogs.length;
+    } else {
+      const deletedOldLoginLogs = await this.prisma.loginLog.deleteMany({
+        where: {
+          createdAt: {
+            gte: firstDayOfLastMonth,
+            lt: firstDayOfCurrentMonth,
+          },
+        },
+      });
 
-  //     return deletedOldLoginLogs.count;
-  //   }
-  // }
+      return deletedOldLoginLogs.count;
+    }
+  }
 
   // async sendLoginLogReport() {
   //   const archiveDir = path.join(process.cwd(), 'archive');

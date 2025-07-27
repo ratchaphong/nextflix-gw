@@ -146,13 +146,13 @@ export class LoginLogController {
     res.send(html);
   }
 
-  // @Get('test-clear')
-  // @ApiOperation({
-  //   summary: '🔧 Test clear old login logs manually (admin only)',
-  // })
-  // @ApiOkResponse({ description: 'Number of deleted logs' })
-  // async testClearLogs(): Promise<number> {
-  //   const deleted = await this.service.clearOldLogsAndArchive();
-  //   return deleted;
-  // }
+  @Get('test-clear')
+  @ApiOperation({
+    summary: '🔧 Test clear old login logs manually (admin only)',
+  })
+  @ApiOkResponse({ description: 'Number of deleted logs' })
+  async testClearLogs(): Promise<number> {
+    const deleted = await this.service.clearOldLogsAndArchive();
+    return deleted;
+  }
 }
