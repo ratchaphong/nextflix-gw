@@ -2,23 +2,22 @@
 import { Injectable } from '@nestjs/common';
 // import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { SMTPClient } from 'emailjs';
+// import { SMTPClient } from 'emailjs';
 
 @Injectable()
 export class MailService {
-  private readonly client: SMTPClient;
-
   constructor(
+    // private readonly client: SMTPClient,
     // private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
   ) {
-    this.client = new SMTPClient({
-      user: this.configService.get('SMTP_USER'),
-      password: this.configService.get('SMTP_PASS'),
-      host: this.configService.get('SMTP_HOST'),
-      port: this.configService.get<number>('SMTP_PORT'),
-      tls: true,
-    });
+    // this.client = new SMTPClient({
+    //   user: this.configService.get('SMTP_USER'),
+    //   password: this.configService.get('SMTP_PASS'),
+    //   host: this.configService.get('SMTP_HOST'),
+    //   port: this.configService.get<number>('SMTP_PORT'),
+    //   tls: true,
+    // });
   }
 
   // async sendLoginLogReport(
