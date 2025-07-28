@@ -4,7 +4,7 @@ import { LoginLogService } from './login-log.service';
 import { LoginLogController } from './login-log.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PdfModule } from 'src/pdf/pdf.module';
-import { MailService } from 'src/mail/mail.service';
+// import { MailService } from 'src/mail/mail.service';
 
 // ✅ เพิ่ม BullMQ + BullBoard
 import { BullModule } from '@nestjs/bullmq';
@@ -31,7 +31,7 @@ import { LoginLogProcessor } from './login-log.processor';
   ],
   providers: [
     LoginLogService,
-    MailService,
+    // MailService,
     LoginLogProducer, // ✅ Producer สำหรับ queue
     LoginLogProcessor, // ✅ Processor สำหรับ consume งาน
   ],
