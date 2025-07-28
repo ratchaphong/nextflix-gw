@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { LoginLogService } from 'src/login-log/login-log.service';
+// import { LoginLogService } from 'src/login-log/login-log.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { THIRTY_DAYS_IN_MS } from 'src/utils/cron.utils';
 
@@ -10,7 +10,7 @@ export class CronService {
 
   constructor(
     private prisma: PrismaService,
-    private loginLogService: LoginLogService,
+    // private loginLogService: LoginLogService,
   ) {
     this.logger.log('✅ CronService initialized');
   }
@@ -53,11 +53,11 @@ export class CronService {
   async clearOldLoginLogs() {
     this.logger.log('🧹 Running clead old logs cleanup...');
 
-    const deletedLogs =
-      await this.loginLogService.clearOldLogsAndArchive(false);
-    await this.loginLogService.sendLoginLogReport();
+    // const deletedLogs =
+    //   await this.loginLogService.clearOldLogsAndArchive(false);
+    // await this.loginLogService.sendLoginLogReport();
 
-    this.logger.log(`🧹 Deleted ${deletedLogs} login logs from last month.`);
+    // this.logger.log(`🧹 Deleted ${deletedLogs} login logs from last month.`);
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
