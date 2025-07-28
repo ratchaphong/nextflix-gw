@@ -10,7 +10,7 @@ export class CronService {
 
   constructor(
     private prisma: PrismaService,
-    // private loginLogService: LoginLogService,
+    private loginLogService: LoginLogService,
   ) {
     this.logger.log('✅ CronService initialized');
   }
@@ -49,16 +49,16 @@ export class CronService {
     );
   }
 
-  // @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
-  // async clearOldLoginLogs() {
-  //   this.logger.log('🧹 Running clead old logs cleanup...');
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  async clearOldLoginLogs() {
+    this.logger.log('🧹 Running clead old logs cleanup...');
 
-  //   const deletedLogs =
-  //     await this.loginLogService.clearOldLogsAndArchive(false);
-  //   await this.loginLogService.sendLoginLogReport();
+    const deletedLogs =
+      await this.loginLogService.clearOldLogsAndArchive(false);
+    await this.loginLogService.sendLoginLogReport();
 
-  //   this.logger.log(`🧹 Deleted ${deletedLogs} login logs from last month.`);
-  // }
+    this.logger.log(`🧹 Deleted ${deletedLogs} login logs from last month.`);
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async disableExpiredUsers() {

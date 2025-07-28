@@ -12,7 +12,9 @@ import { CACHE_TTL_SECONDS } from './utils/auth.utils';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 // import { MailerModule } from '@nestjs-modules/mailer';
-// import { MailService } from './mail/mail.service';
+import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import * as redisStore from 'cache-manager-redis-store';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         store: redisStore,
-        host: config.get<string>('REDIS_HOST'),
+        url: config.get<string>('REDIS_URL'),
         ttl: config.get<number>('CACHE_TTL_SECONDS') || CACHE_TTL_SECONDS,
       }),
     }),
@@ -46,6 +48,22 @@ import * as redisStore from 'cache-manager-redis-store';
     //   }),
     //   inject: [ConfigService],
     // }),
+    // BullMQ: ตั้งค่า Redis Queue
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST'),
+          port: config.get<number>('REDIS_PORT') || 6379,
+        },
+      }),
+    }),
+    // BullBoard UI: Dashboard ที่ /queues
+    BullBoardModule.forRoot({
+      route: '/queues',
+      adapter: ExpressAdapter,
+    }),
     ScheduleModule.forRoot(),
     AuthModule,
     MovieModule,
@@ -54,9 +72,6 @@ import * as redisStore from 'cache-manager-redis-store';
     PrismaModule,
     LoginLogModule,
   ],
-  providers: [
-    CronService,
-    // MailService
-  ],
+  providers: [CronService],
 })
 export class AppModule {}

@@ -1,3 +1,4 @@
+// src/login-log/login-log.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateLoginLogDto } from './dto/create-login-log.dto';
@@ -9,6 +10,7 @@ import {
   subMonths,
   addMonths,
 } from 'date-fns';
+import { LoginLogProducer } from './login-log.producer';
 // import { plainToInstance } from 'class-transformer';
 // import { LoginLogResponseDto } from './dto/login-log-response.dto';
 // import { PdfService } from 'src/pdf/pdf.service';
@@ -19,15 +21,21 @@ import {
 @Injectable()
 export class LoginLogService {
   constructor(
+    private loginLogProducer: LoginLogProducer,
     private prisma: PrismaService,
     // private pdfService: PdfService,
     // private mailService: MailService,
   ) {}
 
-  create(data: CreateLoginLogDto, userId: string) {
-    return this.prisma.loginLog.create({
+  async create(data: CreateLoginLogDto, userId: string) {
+    return await this.prisma.loginLog.create({
       data: { ...data, userId: userId },
     });
+  }
+
+  createInBackground(data: CreateLoginLogDto, userId: string) {
+    this.loginLogProducer.addLoginLogJob(userId, data);
+    return { message: 'Login log queued' };
   }
 
   findAll() {
