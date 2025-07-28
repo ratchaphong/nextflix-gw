@@ -24,10 +24,10 @@ import { LoginLogProcessor } from './login-log.processor';
       name: 'login-log',
     }),
     // ✅ เชื่อม Queue นี้เข้ากับ Bull Board UI
-    BullBoardModule.forFeature({
-      name: 'login-log',
-      adapter: BullMQAdapter,
-    }),
+    // BullBoardModule.forFeature({
+    //   name: 'login-log',
+    //   adapter: BullMQAdapter,
+    // }),
   ],
   providers: [
     LoginLogService,

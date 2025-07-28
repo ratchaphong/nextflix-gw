@@ -60,10 +60,10 @@ import { ExpressAdapter } from '@bull-board/express';
       }),
     }),
     // BullBoard UI: Dashboard ที่ /queues
-    BullBoardModule.forRoot({
-      route: '/queues',
-      adapter: ExpressAdapter,
-    }),
+    // BullBoardModule.forRoot({
+    //   route: '/queues',
+    //   adapter: ExpressAdapter,
+    // }),
     ScheduleModule.forRoot(),
     AuthModule,
     MovieModule,

@@ -1,5 +1,8 @@
 // src/login-log/login-log.producer.ts
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  // OnModuleInit
+} from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { CreateLoginLogDto } from './dto/create-login-log.dto';
