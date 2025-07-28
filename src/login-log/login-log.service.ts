@@ -11,20 +11,20 @@ import {
   addMonths,
 } from 'date-fns';
 // import { LoginLogProducer } from './login-log.producer';
-// import { plainToInstance } from 'class-transformer';
-// import { LoginLogResponseDto } from './dto/login-log-response.dto';
-// import { PdfService } from 'src/pdf/pdf.service';
-// import * as fs from 'fs';
-// import * as path from 'path';
-// import { MailService } from 'src/mail/mail.service';
+import { plainToInstance } from 'class-transformer';
+import { LoginLogResponseDto } from './dto/login-log-response.dto';
+import { PdfService } from 'src/pdf/pdf.service';
+import * as fs from 'fs';
+import * as path from 'path';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class LoginLogService {
   constructor(
     // private loginLogProducer: LoginLogProducer,
     private prisma: PrismaService,
-    // private pdfService: PdfService,
-    // private mailService: MailService,
+    private pdfService: PdfService,
+    private mailService: MailService,
   ) {}
 
   async create(data: CreateLoginLogDto, userId: string) {
@@ -152,22 +152,22 @@ export class LoginLogService {
       return 0;
     }
 
-    // const pdfBuffer = await this.pdfService.generateLoginLogPdf({
-    //   logs: plainToInstance(LoginLogResponseDto, oldLogs),
-    // });
+    const pdfBuffer = await this.pdfService.generateLoginLogPdf({
+      logs: plainToInstance(LoginLogResponseDto, oldLogs),
+    });
 
-    // const archiveDir = path.join(process.cwd(), 'archive');
-    // if (!fs.existsSync(archiveDir)) {
-    //   fs.mkdirSync(archiveDir);
-    // }
+    const archiveDir = path.join(process.cwd(), 'archive');
+    if (!fs.existsSync(archiveDir)) {
+      fs.mkdirSync(archiveDir);
+    }
 
-    // const dateStr = new Date().toISOString().split('T')[0];
+    const dateStr = new Date().toISOString().split('T')[0];
 
-    // const jsonPath = path.join(archiveDir, `login-log-${dateStr}.json`);
-    // fs.writeFileSync(jsonPath, JSON.stringify(oldLogs, null, 2), 'utf-8');
+    const jsonPath = path.join(archiveDir, `login-log-${dateStr}.json`);
+    fs.writeFileSync(jsonPath, JSON.stringify(oldLogs, null, 2), 'utf-8');
 
-    // const pdfPath = path.join(archiveDir, `login-log-${dateStr}.pdf`);
-    // fs.writeFileSync(pdfPath, pdfBuffer);
+    const pdfPath = path.join(archiveDir, `login-log-${dateStr}.pdf`);
+    fs.writeFileSync(pdfPath, pdfBuffer);
 
     if (isSwagger) {
       await this.sendLoginLogReport();
@@ -187,36 +187,36 @@ export class LoginLogService {
   }
 
   async sendLoginLogReport() {
-    // const archiveDir = path.join(process.cwd(), 'archive');
-    // const today = new Date().toISOString().split('T')[0]; // เช่น 2025-08-01
-    // const pdfPath = path.join(archiveDir, `login-log-${today}.pdf`);
-    // const jsonPath = path.join(archiveDir, `login-log-${today}.json`);
-    // const pdfExists = fs.existsSync(pdfPath);
-    // const jsonExists = fs.existsSync(jsonPath);
-    // if (!pdfExists || !jsonExists) {
-    //   console.warn('❌ Missing archived files for email.');
-    //   return;
-    // }
-    // const jsonRaw = fs.readFileSync(jsonPath, 'utf-8');
-    // const jsonObject = JSON.parse(jsonRaw);
-    // const jsonText = jsonObject
-    //   .map((entry, i) => {
-    //     return `#${i + 1} | ${entry.user?.email ?? 'N/A'} | ${entry.ipAddress} | ${entry.createdAt}`;
-    //   })
-    //   .join('\n');
-    // try {
-    //   await this.mailService.sendLoginLogReport(
-    //     pdfPath,
-    //     jsonText,
-    //     '📋 Login Log Cleanup Report (Last Month)',
-    //     'Please find attached the login log archive for last month, in both PDF and JSON formats.',
-    //   );
-    //   console.log('📧 Email sent successfully.');
-    //   fs.unlinkSync(pdfPath);
-    //   fs.unlinkSync(jsonPath);
-    //   console.log('🧹 Archived files deleted.');
-    // } catch (err) {
-    //   console.error('⚠️ Failed to delete archive files:', err);
-    // }
+    const archiveDir = path.join(process.cwd(), 'archive');
+    const today = new Date().toISOString().split('T')[0]; // เช่น 2025-08-01
+    const pdfPath = path.join(archiveDir, `login-log-${today}.pdf`);
+    const jsonPath = path.join(archiveDir, `login-log-${today}.json`);
+    const pdfExists = fs.existsSync(pdfPath);
+    const jsonExists = fs.existsSync(jsonPath);
+    if (!pdfExists || !jsonExists) {
+      console.warn('❌ Missing archived files for email.');
+      return;
+    }
+    const jsonRaw = fs.readFileSync(jsonPath, 'utf-8');
+    const jsonObject = JSON.parse(jsonRaw);
+    const jsonText = jsonObject
+      .map((entry, i) => {
+        return `#${i + 1} | ${entry.user?.email ?? 'N/A'} | ${entry.ipAddress} | ${entry.createdAt}`;
+      })
+      .join('\n');
+    try {
+      await this.mailService.sendLoginLogReport(
+        pdfPath,
+        jsonText,
+        '📋 Login Log Cleanup Report (Last Month)',
+        'Please find attached the login log archive for last month, in both PDF and JSON formats.',
+      );
+      console.log('📧 Email sent successfully.');
+      fs.unlinkSync(pdfPath);
+      fs.unlinkSync(jsonPath);
+      console.log('🧹 Archived files deleted.');
+    } catch (err) {
+      console.error('⚠️ Failed to delete archive files:', err);
+    }
   }
 }
