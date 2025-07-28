@@ -6,6 +6,7 @@ import {
   Req,
   UseGuards,
   Res,
+  Delete,
 } from '@nestjs/common';
 import { LoginLogService } from './login-log.service';
 import { CreateLoginLogDto } from './dto/create-login-log.dto';
@@ -154,5 +155,11 @@ export class LoginLogController {
   async testClearLogs(): Promise<number> {
     const deleted = await this.service.clearOldLogsAndArchive();
     return deleted;
+  }
+
+  @Delete('clear-queue')
+  @ApiOperation({ summary: '⚠️ Clear all jobs in the login-log queue' })
+  clearQueue() {
+    return this.service.clearAllJobs();
   }
 }

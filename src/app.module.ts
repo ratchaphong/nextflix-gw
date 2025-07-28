@@ -12,9 +12,9 @@ import { CACHE_TTL_SECONDS } from './utils/auth.utils';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 // import { MailerModule } from '@nestjs-modules/mailer';
-// import { BullModule } from '@nestjs/bullmq';
-// import { BullBoardModule } from '@bull-board/nestjs';
-// import { ExpressAdapter } from '@bull-board/express';
+import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
 
 @Module({
   imports: [
@@ -59,11 +59,37 @@ import * as redisStore from 'cache-manager-redis-store';
     //     },
     //   }),
     // }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const redisUrlString = new URL(
+          config.get<string>('REDIS_URL') ?? 'redis://localhost:6379',
+        );
+        if (!redisUrlString) {
+          throw new Error(
+            '❌ REDIS_URL is not defined in environment variables',
+          );
+        }
+
+        const redisUrl = new URL(redisUrlString);
+
+        return {
+          connection: {
+            host: redisUrl.hostname,
+            port: Number(redisUrl.port),
+            username: redisUrl.username || undefined,
+            password: redisUrl.password || undefined,
+            tls: redisUrl.protocol === 'rediss:' ? {} : undefined,
+          },
+        };
+      },
+    }),
     // BullBoard UI: Dashboard ที่ /queues
-    // BullBoardModule.forRoot({
-    //   route: '/queues',
-    //   adapter: ExpressAdapter,
-    // }),
+    BullBoardModule.forRoot({
+      route: '/queues',
+      adapter: ExpressAdapter,
+    }),
     ScheduleModule.forRoot(),
     AuthModule,
     MovieModule,

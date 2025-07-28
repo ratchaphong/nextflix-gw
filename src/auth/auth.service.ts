@@ -123,8 +123,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials or expired package');
     }
 
-    await this.loginLogService.create({}, user.id);
-    // this.loginLogService.createInBackground({}, user.id);
+    // await this.loginLogService.create({}, user.id);
+    this.loginLogService.createInBackground({}, user.id);
 
     const token = this.jwtService.sign({ sub: user.id, role: user.role });
 
