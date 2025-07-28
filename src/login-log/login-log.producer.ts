@@ -11,10 +11,6 @@ import { CreateLoginLogDto } from './dto/create-login-log.dto';
 export class LoginLogProducer {
   constructor(@InjectQueue('login-log') private readonly queue: Queue) {}
 
-  // async onModuleInit() {
-  //   await this.addMonthlyCleanupJob();
-  // }
-
   // async addMonthlyCleanupJob() {
   //   try {
   //     await this.queue.add(

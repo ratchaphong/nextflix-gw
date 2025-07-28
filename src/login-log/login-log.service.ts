@@ -10,7 +10,7 @@ import {
   subMonths,
   addMonths,
 } from 'date-fns';
-import { LoginLogProducer } from './login-log.producer';
+// import { LoginLogProducer } from './login-log.producer';
 // import { plainToInstance } from 'class-transformer';
 // import { LoginLogResponseDto } from './dto/login-log-response.dto';
 // import { PdfService } from 'src/pdf/pdf.service';
@@ -21,7 +21,7 @@ import { LoginLogProducer } from './login-log.producer';
 @Injectable()
 export class LoginLogService {
   constructor(
-    private loginLogProducer: LoginLogProducer,
+    // private loginLogProducer: LoginLogProducer,
     private prisma: PrismaService,
     // private pdfService: PdfService,
     // private mailService: MailService,
@@ -33,10 +33,10 @@ export class LoginLogService {
     });
   }
 
-  createInBackground(data: CreateLoginLogDto, userId: string) {
-    this.loginLogProducer.addLoginLogJob(userId, data);
-    return { message: 'Login log queued' };
-  }
+  // createInBackground(data: CreateLoginLogDto, userId: string) {
+  //   this.loginLogProducer.addLoginLogJob(userId, data);
+  //   return { message: 'Login log queued' };
+  // }
 
   findAll() {
     return this.prisma.loginLog.findMany({

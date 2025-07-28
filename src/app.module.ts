@@ -12,9 +12,9 @@ import { CACHE_TTL_SECONDS } from './utils/auth.utils';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 // import { MailerModule } from '@nestjs-modules/mailer';
-import { BullModule } from '@nestjs/bullmq';
-import { BullBoardModule } from '@bull-board/nestjs';
-import { ExpressAdapter } from '@bull-board/express';
+// import { BullModule } from '@nestjs/bullmq';
+// import { BullBoardModule } from '@bull-board/nestjs';
+// import { ExpressAdapter } from '@bull-board/express';
 
 @Module({
   imports: [
@@ -49,16 +49,16 @@ import { ExpressAdapter } from '@bull-board/express';
     //   inject: [ConfigService],
     // }),
     // BullMQ: ตั้งค่า Redis Queue
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST'),
-          port: config.get<number>('REDIS_PORT') || 6379,
-        },
-      }),
-    }),
+    // BullModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => ({
+    //     connection: {
+    //       host: config.get<string>('REDIS_HOST'),
+    //       port: config.get<number>('REDIS_PORT') || 6379,
+    //     },
+    //   }),
+    // }),
     // BullBoard UI: Dashboard ที่ /queues
     // BullBoardModule.forRoot({
     //   route: '/queues',
